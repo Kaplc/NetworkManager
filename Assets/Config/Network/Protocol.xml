@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NetworkData>
+    <enum namespace="Script.NetworkManager" name="EnumTest">
+        <field name="Unity" value=""/>
+        <field name="Windows" value=""/>
+        <field name="Android" value="3"/>
+    </enum>
+    <data namespace="Script.NetworkManager" name="DataTest" extend="">
+        <field type="int" name="a" value="1"/>
+        <field type="float" name="c" value="1"/>
+        <field type="bool" name="b" value="true"/>
+        <field type="string" name="d" value="Kaplc"/>
+        <field type="list" dataType="int"  name="testList"/>
+        <field type="dic" keyType="int" valueType="string" name="testDic"/>
+    </data>
+    <data namespace="Script.NetworkManager" name="DataTest2" extend="">
+        <field type="DataTest1" name="dataTest1"/>
+        <field type="enum" enumType="EnumTest" name="enumTest" value="EnumTest.Unity"/>
+    </data>
+    <message id="1" namespace="Script.NetworkManager" name="MessageTest">
+        <field type="int" name="data" value="1"/>
+    </message>
+</NetworkData>
