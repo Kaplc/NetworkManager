@@ -42,11 +42,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Assets\Script\NetworkManager\Message2.cs" />
+    <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest2.cs" />
     <Compile Include="Assets\Script\NetworkManager\NetworkManager.cs" />
     <Compile Include="Assets\Script\NetworkManager\Message1.cs" />
-    <Compile Include="Assets\Script\NetworkManager\BaseNetworkData.cs" />
-    <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest2.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest.cs" />
+    <Compile Include="Assets\Script\NetworkManager\BaseNetworkData.cs" />
+    <Compile Include="Assets\Script\NetworkManager\ProtocolClass\Enum\EnumTest.cs" />
     <None Include="Assets\Config\Network\Protocol.xml" />
     <Reference Include="UnityEngine">
       <HintPath>E:\Develop\Unity\Unity 2021.3.35f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>

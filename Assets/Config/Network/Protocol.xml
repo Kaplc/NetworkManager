@@ -10,7 +10,7 @@
         <field type="float" name="c" value="1"/>
         <field type="bool" name="b" value="true"/>
         <field type="string" name="d" value="Kaplc"/>
-        <field type="list" dataType="int"  name="testList"/>
+        <field type="list" valueType="int"  name="testList"/>
         <field type="dic" keyType="int" valueType="string" name="testDic"/>
     </data>
     <data namespace="Script.NetworkManager" name="DataTest2" extend="">
