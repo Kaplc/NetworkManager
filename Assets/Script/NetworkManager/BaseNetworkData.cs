@@ -13,7 +13,7 @@ namespace Script.NetworkManager
 
         public abstract byte[] Serialize();
 
-        public abstract int Deserialize(byte[] bytes, ref int index);
+        public abstract T Deserialize<T>(byte[] bytes, ref int index) where T : class;
 
         #region 转字节
 
@@ -46,11 +46,11 @@ namespace Script.NetworkManager
             index += strBytes.Length;
         }
         
-        public void WriteOther(BaseNetworkData data, byte[] bytes, ref int index)
+        public void WriteClass<T>(T value, byte[] bytes, ref int index) where T : BaseNetworkData
         {
-            byte[] dataBytes = data.Serialize();
-            dataBytes.CopyTo(bytes, index);
-            index += dataBytes.Length;
+            byte[] classBytes = value.Serialize();
+            classBytes.CopyTo(bytes, index);
+            index += classBytes.Length;
         }
 
         #endregion
@@ -83,6 +83,12 @@ namespace Script.NetworkManager
             int strLength = ReadInt(bytes, ref index);
             string value = Encoding.UTF8.GetString(bytes, index, strLength);
             index += strLength;
+            return value;
+        }
+        
+        public T ReadClass<T>(byte[] bytes, ref int index) where T : BaseNetworkData, new()
+        {
+            T value = new T().Deserialize<T>(bytes, ref index);
             return value;
         }
 

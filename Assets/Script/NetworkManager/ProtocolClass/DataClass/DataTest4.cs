@@ -5,16 +5,16 @@ using System.Text;
 
 namespace Script.NetworkManager
 {
-	public class DataTest : BaseNetworkData
+	public class DataTest4 : BaseNetworkData
 	{
-		public EnumTest enumTest = EnumTest.Android;
-		public DataTest2 dataTest2;
+		public DataTest5 t5;
+		public EnumTest enumTest = EnumTest.Windows;
 
 		public override int GetSize()
 		{
 			int size = 0;
+			size += t5.GetSize();
 			size += 4;
-			size += dataTest2.GetSize();
 
 			return size;
 		}
@@ -24,16 +24,16 @@ namespace Script.NetworkManager
 			byte[] bytes = new byte[GetSize()];
 			int index = 0;
 
+			WriteClass(t5, bytes, ref index);
 			WriteInt((int)enumTest, bytes, ref index);
-			WriteClass(dataTest2, bytes, ref index);
 
 			return bytes;
 		}
 
 		public override T Deserialize<T>(byte[] bytes, ref int index)
 		{
+			t5 = ReadClass<DataTest5>(bytes, ref index);
 			enumTest = (EnumTest)ReadInt(bytes, ref index);
-			dataTest2 = ReadClass<DataTest2>(bytes, ref index);
 
 			return this as T;
 		}

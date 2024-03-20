@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Script.NetworkManager
@@ -10,6 +11,7 @@ namespace Script.NetworkManager
         public float b;
         public bool c;
         public string d;
+        public List<string> strList = new List<string>();
         public Message1 message1;
 
         public override int GetSize()
@@ -36,19 +38,32 @@ namespace Script.NetworkManager
             WriteString(d, bytes, ref index);
             message1.Serialize().CopyTo(bytes, index);
 
+            WriteInt(strList.Count, bytes, ref index);
+            foreach (var item in strList)
+            {
+                WriteString(item, bytes, ref index);
+            }
+
             return bytes;
         }
 
-        public override int Deserialize(byte[] bytes, ref int index)
+        public override T Deserialize<T>(byte[] bytes, ref int index)
         {
             a = ReadInt(bytes, ref index);
             b = ReadFloat(bytes, ref index);
             c = ReadBool(bytes, ref index);
             d = ReadString(bytes, ref index);
-            message1 = new Message1();
-            message1.Deserialize(bytes, ref index);
 
-            return GetSize();
+            int count = ReadInt(bytes, ref index);
+            for (int i = 0; i < count; i++)
+            {
+                strList.Add(ReadString(bytes, ref index));
+            }
+
+
+            message1 = new Message1().Deserialize<Message1>(bytes, ref index);
+
+            return this as T;
         }
     }
 }

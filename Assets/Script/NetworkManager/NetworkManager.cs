@@ -8,20 +8,47 @@ public class NetworkManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Message2 message = new Message2();
-        message.a = 1;
-        message.b = 2.0f;
-        message.c = true;
-        message.d = "hello world";
-        message.message1 = new Message1()
+        DataTest dataTest = new DataTest();
+        dataTest.dataTest2 = new DataTest2()
         {
-            abc = "Kaplc"
+            dic3 = new Dictionary<int, DataTest3>()
+            {
+                {1, new DataTest3()
+                {
+                    lis3 = new List<EnumTest>()
+                    {
+                        EnumTest.Unity
+                    }
+                }},
+                {2, new DataTest3()
+                {
+                    lis3 = new List<EnumTest>()
+                    {
+                        EnumTest.Windows
+                    }
+                }},
+                {3, new DataTest3()
+                {
+                    lis3 = new List<EnumTest>()
+                    {
+                        EnumTest.Android
+                    }
+                }},
+            },
         };
         
-        byte[] bytes = message.Serialize();
+        dataTest.dataTest2.dataTest3 = new DataTest3();
+        
+        
+        byte[] bytes = dataTest.Serialize();
         int index = 0;
-        Message2 newMessage = new Message2();
-        newMessage.Deserialize(bytes, ref index);
+        DataTest dataTest2 = new DataTest().Deserialize<DataTest>(bytes, ref index);
+
+        // DataTest4 dataTest4 = new DataTest4();
+        // dataTest4.t5 = new DataTest5();
+        // byte[] bytes = dataTest4.Serialize();
+        // int index = 0;
+        // DataTest4 t4 = new DataTest4().Deserialize<DataTest4>(bytes, ref index);
     }
 
     // Update is called once per frame

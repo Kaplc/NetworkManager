@@ -5,19 +5,27 @@
         <field name="Windows" value=""/>
         <field name="Android" value="3"/>
     </enum>
-    <data namespace="Script.NetworkManager" name="DataTest" extend="">
-        <field type="int" name="a" value="1"/>
-        <field type="float" name="c" value="1"/>
-        <field type="bool" name="b" value="true"/>
-        <field type="string" name="d" value="Kaplc"/>
-        <field type="list" valueType="int"  name="testList"/>
-        <field type="dic" keyType="int" valueType="string" name="testDic"/>
+    <data namespace="Script.NetworkManager" name="DataTest" extend="BaseNetworkData">
+        <field type="enum" enumType="EnumTest" name="enumTest" value="EnumTest.Android"/>
+        <field type="DataTest2" name="dataTest2"/>
     </data>
-    <data namespace="Script.NetworkManager" name="DataTest2" extend="">
-        <field type="DataTest1" name="dataTest1"/>
+    <data namespace="Script.NetworkManager" name="DataTest2" extend="BaseNetworkData">
+        <field type="dic" keyType="int" valueType="DataTest3" name="dic3"/>
+        <field type="DataTest3" name="dataTest3"/>
         <field type="enum" enumType="EnumTest" name="enumTest" value="EnumTest.Unity"/>
     </data>
-    <message id="1" namespace="Script.NetworkManager" name="MessageTest">
+    <data namespace="Script.NetworkManager" name="DataTest3" extend="BaseNetworkData">
+        <field type="list" valueType="enum_EnumTest" name="lis3"/>
+        <field type="enum" enumType="EnumTest" name="enumTest" value="EnumTest.Windows"/>
+    </data>
+    <data namespace="Script.NetworkManager" name="DataTest4" extend="BaseNetworkData">
+        <field type="DataTest5" name="t5"/>
+        <field type="enum" enumType="EnumTest" name="enumTest" value="EnumTest.Windows"/>
+    </data>
+    <data namespace="Script.NetworkManager" name="DataTest5" extend="BaseNetworkData">
+        <field type="enum" enumType="EnumTest" name="enumTest" value="EnumTest.Windows"/>
+    </data>
+    <message id="1" namespace="Script.NetworkManager" name="MessageTest" extend="">
         <field type="int" name="data" value="1"/>
     </message>
 </NetworkData>
