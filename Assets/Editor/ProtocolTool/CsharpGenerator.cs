@@ -674,8 +674,7 @@ namespace Editor.ProtocolTool
             foreach (XmlNode field in fields)
             {
                 string fieldType = field.Attributes["type"].Value;
-
-
+                
                 switch (fieldType)
                 {
                     case "list":
@@ -754,7 +753,7 @@ namespace Editor.ProtocolTool
                               "\t\t\tbyte[] bytes = new byte[GetSize()];\n" +
                               "\t\t\tint index = 0;\n" +
                               "\t\t\tWriteInt(messageID, bytes, ref index);\n" +
-                              "\t\t\tWriteInt(GetSize() - 4 - 4, bytes, ref index); // -8消息长度不包含id和长度信息\n" +
+                              "\t\t\tWriteInt(GetSize(), bytes, ref index);\n" +
                               "\n";
 
             foreach (XmlNode field in fields)

@@ -92,10 +92,14 @@ public class Server
         {
             try
             {
-                foreach (ClientSocket clientSocket in clientSocketsDic.Values)
+                lock (clientSocketsDic)
                 {
-                    clientSocket.Receive();
+                    foreach (ClientSocket clientSocket in clientSocketsDic.Values)
+                    {
+                        clientSocket.Receive();
+                    }
                 }
+                
             }
             catch (Exception e)
             {

@@ -28,7 +28,7 @@ namespace Script.NetworkManager
 			byte[] bytes = new byte[GetSize()];
 			int index = 0;
 			WriteInt(messageID, bytes, ref index);
-			WriteInt(GetSize() - 4 - 4, bytes, ref index); // -8消息长度不包含id和长度信息
+			WriteInt(GetSize(), bytes, ref index);
 
 			WriteInt(data2, bytes, ref index);
 			WriteClass(t5, bytes, ref index);

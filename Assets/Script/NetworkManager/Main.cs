@@ -33,7 +33,17 @@ public class Main : MonoBehaviour
             // networkManager.Send(inputField.text);
             
             MessageTest t1 = new MessageTest(); 
-            networkManager.Send(t1);
+            t1.data = 1;
+            byte[] bytes = t1.Serialize();
+            
+            byte[] bytes1 = new byte[10];
+            Array.Copy(bytes, 0, bytes1, 0, bytes1.Length);
+            
+            byte[] bytes2 = new byte[bytes.Length - 10];
+            Array.Copy(bytes, 10, bytes2, 0, bytes2.Length);
+
+            networkManager.socket.Send(bytes1);
+            networkManager.socket.Send(bytes2);
         });
 
         server = new Server();

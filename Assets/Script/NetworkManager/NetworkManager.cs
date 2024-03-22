@@ -16,7 +16,7 @@ public class NetworkManager : MonoBehaviour
 
     private IPEndPoint ipEndPoint;
     public ENetworkType clientType;
-    private Socket socket;
+    public Socket socket;
 
     private Queue<BaseNetworkData> sendMessageQueue = new();
     private Queue<BaseNetworkData> receiveMessageQueue = new();

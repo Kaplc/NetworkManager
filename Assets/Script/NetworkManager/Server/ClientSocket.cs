@@ -9,7 +9,11 @@ namespace Script.NetworkManager
     public class ClientSocket
     {
         public string guid;
-        public Socket socket;
+        private Socket socket;
+
+        private byte[] cacheBuffer = new byte[1024 * 1024]; // 分包粘包处理
+        private int cacheIndex = 0;
+        private int remainingLength = -1;
 
         public ClientSocket(Socket socket)
         {
@@ -26,34 +30,48 @@ namespace Script.NetworkManager
         {
             if (socket.Available > 0)
             {
-                byte[] bytes = new byte[socket.ReceiveBufferSize];
+                byte[] bytes = new byte[socket.Available];
                 socket.Receive(bytes);
-                int messageID = BitConverter.ToInt32(bytes, 0);
-                int length = BitConverter.ToInt32(bytes, 4);
-                
-                BaseNetworkData data = null;
-                switch (messageID)
-                {
-                    case 1:
-                        data = new MessageTest();
-                        data.Deserialize<MessageTest>(bytes, 8);
-                        break;
-                }
-                
-                // new thread handler
-                ThreadPool.QueueUserWorkItem(Handler, data);
+
+                HandlePackage(bytes, bytes.Length);
             }
         }
 
-        private void Handler(object state)
+        private void HandlePackage(byte[] bytes, int byteLength)
         {
-            BaseNetworkData data = state as BaseNetworkData;
-            switch (data)
+            int nowIndex = 0;
+            int id;
+            int length = 0;
+
+            bytes.CopyTo(cacheBuffer, cacheIndex);
+            cacheIndex += byteLength;
+
+            if (cacheIndex > 8)
             {
-                case MessageTest messageTest:
-                    Debug.Log($"receive message id: {messageTest.messageID}, data: {messageTest.data}");
-                    break;
+                id = BitConverter.ToInt32(cacheBuffer, 0);
+                nowIndex += 4;
+                length = BitConverter.ToInt32(cacheBuffer, 4);
+                nowIndex += 4;
             }
+
+            if (cacheIndex > nowIndex && cacheIndex <= length && nowIndex != 0)
+            {
+                if (cacheIndex == length)
+                {
+                    // 有完整数据
+                    byte[] messageBytes = new byte[length];
+                    Array.Copy(cacheBuffer, messageBytes, length);
+                    cacheIndex = 0;
+
+                    ThreadPool.QueueUserWorkItem(HandlerThread, messageBytes);
+                }
+            }
+        }
+
+        private void HandlerThread(object state)
+        {
+            MessageTest test = new MessageTest().Deserialize<MessageTest>((byte[])state, 8);
+            Debug.Log($"client: {test.data}");
         }
     }
 }
