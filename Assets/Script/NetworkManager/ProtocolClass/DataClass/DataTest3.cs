@@ -40,7 +40,7 @@ namespace Script.NetworkManager
 			return bytes;
 		}
 
-		public override T Deserialize<T>(byte[] bytes, ref int index)
+		public override T Deserialize<T>(byte[] bytes, int index)
 		{
 
 			int listCount = ReadInt(bytes, ref index);

@@ -52,7 +52,6 @@ namespace Editor.ProtocolTool
             AssetDatabase.Refresh();
         }
 
-
         #region data class
 
         private void GenerateDataClass(XmlNodeList classes)
@@ -187,7 +186,7 @@ namespace Editor.ProtocolTool
                                 $"\t\tpublic Dictionary<{field.Attributes["keyType"].Value}, {field.Attributes["valueType"].Value}> {field.Attributes["name"].Value}" +
                                 $" = new Dictionary<{field.Attributes["keyType"].Value}, {field.Attributes["valueType"].Value}>();\n";
                         }
-                       
+
                         break;
                     case "enum":
                         if (field.Attributes["value"].Value == "")
@@ -204,14 +203,13 @@ namespace Editor.ProtocolTool
                     default:
                         fieldsText +=
                             $"\t\tpublic {field.Attributes["type"].Value} {field.Attributes["name"].Value};\n";
-                            // $" = new {field.Attributes["type"].Value}();\n";
+                        // $" = new {field.Attributes["type"].Value}();\n";
                         break;
                 }
             }
 
             return fieldsText;
         }
-
 
         private string GetSizeFuncText(XmlNodeList fields)
         {
@@ -258,7 +256,7 @@ namespace Editor.ProtocolTool
                         string dicForeachText = "";
                         dicForeachText += $"\t\t\tforeach (var item in {field.Attributes["name"].Value})\n";
                         dicForeachText += "\t\t\t{\n";
-                        
+
                         if (dicKeyType.StartsWith("enum") && !dicValueType.StartsWith("enum"))
                         {
                             dicForeachText += $"\t\t\t\tsize += 4;\n";
@@ -388,7 +386,7 @@ namespace Editor.ProtocolTool
 
         private string GetDeserializeFuncText(XmlNodeList fields)
         {
-            string funcText = "\t\tpublic override T Deserialize<T>(byte[] bytes, ref int index)\n" +
+            string funcText = "\t\tpublic override T Deserialize<T>(byte[] bytes, int index)\n" +
                               "\t\t{\n";
 
             foreach (XmlNode field in fields)
@@ -552,6 +550,8 @@ namespace Editor.ProtocolTool
 
         #endregion
 
+        #region enum
+
         private void GenerateEnum(XmlNodeList nodeList)
         {
             string enumPath = CLASS_PATH + "Enum/";
@@ -607,6 +607,10 @@ namespace Editor.ProtocolTool
             return fieldsText;
         }
 
+        #endregion
+
+        #region message
+
         private void GenerateMessageClass(XmlNodeList messages)
         {
             string messageClassPath = CLASS_PATH + "MessageClass/";
@@ -638,9 +642,16 @@ namespace Editor.ProtocolTool
                               "{\n" +
                               $"\tpublic class {classNameText}{extendText}\n" +
                               "\t{\n" +
-                              $"\t\tpublic int id = {message.Attributes["id"].Value};\n" +
+                              $"\t\tpublic int messageID = {message.Attributes["id"].Value};\n" +
                               // get fields
                               GetClassFieldText(message.SelectNodes("field")) +
+                              "\n" +
+                              // get size func
+                              GetMessageSizeFuncText(message.SelectNodes("field")) +
+                              "\n" +
+                              GetMessageSerializeFuncText(message.SelectNodes("field")) +
+                              "\n" +
+                              GetMessageDeserializeFuncText(message.SelectNodes("field"))+
                               "\t}\n" +
                               "}\n";
 
@@ -650,5 +661,262 @@ namespace Editor.ProtocolTool
                 File.WriteAllText(classPath, text);
             }
         }
+
+        private string GetMessageSizeFuncText(XmlNodeList fields)
+        {
+            string sizeFuncText = "\t\tpublic override int GetSize()\n" +
+                                  "\t\t{\n" +
+                                  "\t\t\tint size = 0;\n" +
+                                  "\t\t\tsize += sizeof(int); // message id\n" + // message id
+                                  "\t\t\tsize += sizeof(int); // message length\n" + // message length
+                                  "\n"; 
+
+            foreach (XmlNode field in fields)
+            {
+                string fieldType = field.Attributes["type"].Value;
+
+
+                switch (fieldType)
+                {
+                    case "list":
+                        string valueType = field.Attributes["valueType"].Value;
+                        // list count
+                        sizeFuncText += "\n\t\t\tsize += sizeof(int);\n";
+
+                        // func
+                        string listForeachText = "";
+                        listForeachText += $"\t\t\tforeach (var item in {field.Attributes["name"].Value})\n";
+                        listForeachText += "\t\t\t{\n";
+
+                        if (valueType.StartsWith("enum"))
+                        {
+                            listForeachText += $"\t\t\t\tsize += 4;\n";
+                        }
+                        else
+                        {
+                            listForeachText += $"\t\t\t\tsize += {GetBaseTypeSize(valueType, "item")};\n";
+                        }
+
+                        listForeachText += "\t\t\t}\n";
+                        sizeFuncText += listForeachText;
+
+                        break;
+                    case "dic":
+                        string dicKeyType = field.Attributes["keyType"].Value;
+                        string dicValueType = field.Attributes["valueType"].Value;
+                        // dict count
+                        sizeFuncText += "\n\t\t\tsize += sizeof(int);\n";
+                        // func
+                        string dicForeachText = "";
+                        dicForeachText += $"\t\t\tforeach (var item in {field.Attributes["name"].Value})\n";
+                        dicForeachText += "\t\t\t{\n";
+
+                        if (dicKeyType.StartsWith("enum") && !dicValueType.StartsWith("enum"))
+                        {
+                            dicForeachText += $"\t\t\t\tsize += 4;\n";
+                            dicForeachText += $"\t\t\t\tsize += {GetBaseTypeSize(dicValueType, "item.Value")};\n";
+                        }
+                        else if (dicValueType.StartsWith("enum") && !dicKeyType.StartsWith("enum"))
+                        {
+                            dicForeachText += $"\t\t\t\tsize += {GetBaseTypeSize(dicKeyType, "item.Key")};\n";
+                            dicForeachText += $"\t\t\t\tsize += 4;\n";
+                        }
+                        else if (dicValueType.StartsWith("enum") && dicKeyType.StartsWith("enum"))
+                        {
+                            dicForeachText += $"\t\t\t\tsize += 4;\n";
+                            dicForeachText += $"\t\t\t\tsize += 4;\n";
+                        }
+                        else
+                        {
+                            dicForeachText += $"\t\t\t\tsize += {GetBaseTypeSize(dicKeyType, "item.Key")};\n";
+                            dicForeachText += $"\t\t\t\tsize += {GetBaseTypeSize(dicValueType, "item.Value")};\n";
+                        }
+
+                        dicForeachText += "\t\t\t}\n";
+
+                        sizeFuncText += dicForeachText;
+                        break;
+                    default:
+                        sizeFuncText += $"\t\t\tsize += {GetBaseTypeSize(field.Attributes["type"].Value, field.Attributes["name"].Value)};\n";
+                        break;
+                }
+            }
+
+            sizeFuncText += "\n\t\t\treturn size;\n" +
+                            "\t\t}\n";
+            return sizeFuncText;
+        }
+
+        private string GetMessageSerializeFuncText(XmlNodeList fields)
+        {
+            string funcText = "\t\tpublic override byte[] Serialize()\n" +
+                              "\t\t{\n" +
+                              "\t\t\tbyte[] bytes = new byte[GetSize()];\n" +
+                              "\t\t\tint index = 0;\n" +
+                              "\t\t\tWriteInt(messageID, bytes, ref index);\n" +
+                              "\t\t\tWriteInt(GetSize() - 4 - 4, bytes, ref index); // -8消息长度不包含id和长度信息\n" +
+                              "\n";
+
+            foreach (XmlNode field in fields)
+            {
+                switch (field.Attributes["type"].Value)
+                {
+                    case "int":
+                        funcText += $"\t\t\tWriteInt({field.Attributes["name"].Value}, bytes, ref index);\n";
+                        break;
+                    case "float":
+                        funcText += $"\t\t\tWriteFloat({field.Attributes["name"].Value}, bytes, ref index);\n";
+                        break;
+                    case "bool":
+                        funcText += $"\t\t\tWriteBool({field.Attributes["name"].Value}, bytes, ref index);\n";
+                        break;
+                    case "string":
+                        funcText += $"\t\t\tWriteString({field.Attributes["name"].Value}, bytes, ref index);\n";
+                        break;
+                    case "enum":
+                        funcText += $"\t\t\tWriteInt((int){field.Attributes["name"].Value}, bytes, ref index);\n";
+                        break;
+                    case "list":
+                        funcText += $"\n\t\t\tWriteInt({field.Attributes["name"].Value}.Count, bytes, ref index);\n";
+                        funcText += $"\t\t\tforeach (var item in {field.Attributes["name"].Value})\n";
+                        funcText += "\t\t\t{\n";
+
+                        if (field.Attributes["valueType"].Value.StartsWith("enum"))
+                        {
+                            funcText += $"\t\t\t\tWriteInt((int)item, bytes, ref index);\n";
+                        }
+                        else
+                        {
+                            funcText += $"\t\t\t\t{GetBaseTypeSerialize(field.Attributes["valueType"].Value, "item")};\n";
+                        }
+
+                        funcText += "\t\t\t}\n";
+                        break;
+                    case "dic":
+
+                        funcText += $"\n\t\t\tWriteInt({field.Attributes["name"].Value}.Count, bytes, ref index);\n";
+                        funcText += $"\t\t\tforeach (var item in {field.Attributes["name"].Value})\n";
+                        funcText += "\t\t\t{\n";
+                        if (field.Attributes["keyType"].Value.StartsWith("enum") && !field.Attributes["valueType"].Value.StartsWith("enum"))
+                        {
+                            funcText +=
+                                $"\t\t\t\tWriteInt((int)item.Key, bytes, ref index);\n";
+                        }
+                        else if (field.Attributes["valueType"].Value.StartsWith("enum") && !field.Attributes["keyType"].Value.StartsWith("enum"))
+                        {
+                            funcText +=
+                                $"\t\t\t\t{GetBaseTypeSerialize(field.Attributes["keyType"].Value, "item.Key")};\n";
+                        }
+                        else if (field.Attributes["valueType"].Value.StartsWith("enum") && field.Attributes["keyType"].Value.StartsWith("enum"))
+                        {
+                            funcText +=
+                                $"\t\t\t\tWriteInt((int)item.Key, bytes, ref index);\n";
+                            funcText +=
+                                $"\t\t\t\tWriteInt((int)item.Value, bytes, ref index);\n";
+                        }
+                        else if (field.Attributes["valueType"].Value.StartsWith("enum") && field.Attributes["keyType"].Value.StartsWith("enum"))
+                        {
+                            funcText +=
+                                $"\t\t\t\tWriteInt((int)item.Key, bytes, ref index);\n";
+                            funcText +=
+                                $"\t\t\t\tWriteInt((int)item.Value, bytes, ref index);\n";
+                        }
+                        else
+                        {
+                            funcText += $"\t\t\t\t{GetBaseTypeSerialize(field.Attributes["keyType"].Value, "item.Key")};\n";
+                            funcText += $"\t\t\t\t{GetBaseTypeSerialize(field.Attributes["valueType"].Value, "item.Value")};\n";
+                        }
+
+                        funcText += "\t\t\t}\n";
+                        break;
+                    default:
+                        funcText += $"\t\t\t{GetBaseTypeSerialize(field.Attributes["type"].Value, field.Attributes["name"].Value)};\n";
+                        break;
+                }
+            }
+
+            funcText += "\n\t\t\treturn bytes;\n" +
+                        "\t\t}\n";
+            return funcText;
+        }
+
+        private string GetMessageDeserializeFuncText(XmlNodeList fields)
+        {
+            string funcText = "\t\tpublic override T Deserialize<T>(byte[] bytes, int index)\n" +
+                              "\t\t{\n";
+
+            foreach (XmlNode field in fields)
+            {
+                switch (field.Attributes["type"].Value)
+                {
+                    case "list":
+                        funcText += $"\n\t\t\tint listCount = ReadInt(bytes, ref index);\n";
+                        funcText += $"\t\t\tfor (int i = 0; i < listCount; i++)\n";
+                        funcText += "\t\t\t{\n";
+                        if (field.Attributes["valueType"].Value.StartsWith("enum"))
+                        {
+                            funcText +=
+                                $"\t\t\t\t{field.Attributes["name"].Value}.Add({GetBaseTypeDeserialize(field.Attributes["valueType"].Value.Split('_')[1], true)});\n";
+                        }
+                        else
+                        {
+                            funcText +=
+                                $"\t\t\t\t{field.Attributes["name"].Value}.Add({GetBaseTypeDeserialize(field.Attributes["valueType"].Value)});\n";
+                        }
+
+                        funcText += "\t\t\t}\n";
+
+                        break;
+                    case "dic":
+                        funcText += $"\n\t\t\tint dicCount = ReadInt(bytes, ref index);\n";
+                        funcText += $"\t\t\tfor (int i = 0; i < dicCount; i++)\n";
+                        funcText += "\t\t\t{\n";
+
+                        if (field.Attributes["keyType"].Value.StartsWith("enum") && !field.Attributes["valueType"].Value.StartsWith("enum"))
+                        {
+                            funcText +=
+                                $"\t\t\t\t{field.Attributes["name"].Value}.Add({GetBaseTypeDeserialize(field.Attributes["keyType"].Value.Split('_')[1], true)}," +
+                                $"{GetBaseTypeDeserialize(field.Attributes["valueType"].Value)});\n";
+                        }
+                        else if (field.Attributes["valueType"].Value.StartsWith("enum") && !field.Attributes["keyType"].Value.StartsWith("enum"))
+                        {
+                            funcText +=
+                                $"\t\t\t\t{field.Attributes["name"].Value}.Add({GetBaseTypeDeserialize(field.Attributes["keyType"].Value)}," +
+                                $"{GetBaseTypeDeserialize(field.Attributes["valueType"].Value.Split('_')[1], true)});\n";
+                        }
+                        else if (field.Attributes["valueType"].Value.StartsWith("enum") && field.Attributes["keyType"].Value.StartsWith("enum"))
+                        {
+                            funcText +=
+                                $"\t\t\t\t{field.Attributes["name"].Value}.Add({GetBaseTypeDeserialize(field.Attributes["keyType"].Value.Split('_')[1], true)}," +
+                                $"{GetBaseTypeDeserialize(field.Attributes["valueType"].Value.Split('_')[1], true)});\n";
+                        }
+                        else
+                        {
+                            funcText +=
+                                $"\t\t\t\t{field.Attributes["name"].Value}.Add({GetBaseTypeDeserialize(field.Attributes["keyType"].Value)}," +
+                                $"{GetBaseTypeDeserialize(field.Attributes["valueType"].Value)});\n";
+                        }
+
+                        funcText += "\t\t\t}\n";
+
+                        break;
+                    case "enum":
+                        funcText +=
+                            $"\t\t\t{field.Attributes["name"].Value} = {GetBaseTypeDeserialize(field.Attributes["enumType"].Value, true)};\n";
+                        break;
+                    default:
+                        funcText +=
+                            $"\t\t\t{field.Attributes["name"].Value} = {GetBaseTypeDeserialize(field.Attributes["type"].Value)};\n";
+                        break;
+                }
+            }
+
+            funcText += "\n\t\t\treturn this as T;\n" +
+                        "\t\t}\n";
+
+            return funcText;
+        }
+
+        #endregion
     }
 }

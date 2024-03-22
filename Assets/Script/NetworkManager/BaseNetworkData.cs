@@ -13,7 +13,7 @@ namespace Script.NetworkManager
 
         public abstract byte[] Serialize();
 
-        public abstract T Deserialize<T>(byte[] bytes, ref int index) where T : class;
+        public abstract T Deserialize<T>(byte[] bytes, int index) where T : class;
 
         #region 转字节
 
@@ -88,7 +88,8 @@ namespace Script.NetworkManager
         
         public T ReadClass<T>(byte[] bytes, ref int index) where T : BaseNetworkData, new()
         {
-            T value = new T().Deserialize<T>(bytes, ref index);
+            T value = new T().Deserialize<T>(bytes, index);
+            index += value.GetSize();
             return value;
         }
 

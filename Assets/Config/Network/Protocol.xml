@@ -25,7 +25,11 @@
     <data namespace="Script.NetworkManager" name="DataTest5" extend="BaseNetworkData">
         <field type="enum" enumType="EnumTest" name="enumTest" value="EnumTest.Windows"/>
     </data>
-    <message id="1" namespace="Script.NetworkManager" name="MessageTest" extend="">
+    <message id="1" namespace="Script.NetworkManager" name="MessageTest" extend="BaseNetworkData">
         <field type="int" name="data" value="1"/>
+    </message>
+    <message id="2" namespace="Script.NetworkManager" name="MessageTest2" extend="BaseNetworkData">
+        <field type="int" name="data2" value="1"/>
+        <field type="DataTest5" name="t5"/>
     </message>
 </NetworkData>

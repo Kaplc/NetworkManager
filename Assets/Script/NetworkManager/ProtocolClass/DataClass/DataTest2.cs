@@ -45,7 +45,7 @@ namespace Script.NetworkManager
 			return bytes;
 		}
 
-		public override T Deserialize<T>(byte[] bytes, ref int index)
+		public override T Deserialize<T>(byte[] bytes, int index)
 		{
 
 			int dicCount = ReadInt(bytes, ref index);

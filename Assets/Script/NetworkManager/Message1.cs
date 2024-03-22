@@ -38,7 +38,7 @@ namespace Script.NetworkManager
             return bytes;
         }
 
-        public override T Deserialize<T>(byte[] bytes, ref int index)
+        public override T Deserialize<T>(byte[] bytes, int index)
         {
             abc = ReadString(bytes, ref index);
             return this as T;

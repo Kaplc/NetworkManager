@@ -1,59 +1,126 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
 using Script.NetworkManager;
 using UnityEngine;
 
 public class NetworkManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        DataTest dataTest = new DataTest();
-        dataTest.dataTest2 = new DataTest2()
-        {
-            dic3 = new Dictionary<int, DataTest3>()
-            {
-                {1, new DataTest3()
-                {
-                    lis3 = new List<EnumTest>()
-                    {
-                        EnumTest.Unity
-                    }
-                }},
-                {2, new DataTest3()
-                {
-                    lis3 = new List<EnumTest>()
-                    {
-                        EnumTest.Windows
-                    }
-                }},
-                {3, new DataTest3()
-                {
-                    lis3 = new List<EnumTest>()
-                    {
-                        EnumTest.Android
-                    }
-                }},
-            },
-        };
-        
-        dataTest.dataTest2.dataTest3 = new DataTest3();
-        
-        
-        byte[] bytes = dataTest.Serialize();
-        int index = 0;
-        DataTest dataTest2 = new DataTest().Deserialize<DataTest>(bytes, ref index);
+    public string serverIp;
+    public int serverPort;
+    public bool isConnect;
 
-        // DataTest4 dataTest4 = new DataTest4();
-        // dataTest4.t5 = new DataTest5();
-        // byte[] bytes = dataTest4.Serialize();
-        // int index = 0;
-        // DataTest4 t4 = new DataTest4().Deserialize<DataTest4>(bytes, ref index);
+    private IPEndPoint ipEndPoint;
+    public ENetworkType clientType;
+    private Socket socket;
+
+    private Queue<BaseNetworkData> sendMessageQueue = new();
+    private Queue<BaseNetworkData> receiveMessageQueue = new();
+
+    // Start is called before the first frame update
+    void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+
+        switch (clientType)
+        {
+            case ENetworkType.TcpV4:
+                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                break;
+            case ENetworkType.TcpV6:
+                socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+                break;
+            case ENetworkType.UdpV4:
+                socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                break;
+            case ENetworkType.UdpV6:
+                socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
+                break;
+        }
+
+        ipEndPoint = new IPEndPoint(IPAddress.Parse(serverIp), serverPort);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (receiveMessageQueue.Count > 0)
+        {
+            Debug.Log($"server: {receiveMessageQueue.Dequeue()}");
+        }
+    }
+
+    public void Connect()
+    {
+        if (isConnect)
+        {
+            return;
+        }
+
+        try
+        {
+            socket.Connect(ipEndPoint);
+            isConnect = true;
+
+            Debug.Log("connect success");
+            // new thread check queue then send message
+            ThreadPool.QueueUserWorkItem(SendMessageThread);
+            ThreadPool.QueueUserWorkItem(ReceiveMessageThread);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"server connect fail");
+            Debug.LogError(e);
+            throw;
+        }
+    }
+
+    private void SendMessageThread(object state)
+    {
+        while (isConnect)
+        {
+            if (sendMessageQueue.Count > 0)
+            {
+                byte[] bytes = sendMessageQueue.Dequeue().Serialize();
+                socket.Send(bytes);
+            }
+        }
+    }
+
+    private void ReceiveMessageThread(object state)
+    {
+        while (isConnect)
+        {
+            // will receive message
+            if (socket.Available > 0)
+            {
+                byte[] bytes = new byte[socket.ReceiveBufferSize];
+                socket.Receive(bytes);
+                // get id
+                int id = BitConverter.ToInt32(bytes, 0);
+                int length = BitConverter.ToInt32(bytes, 4);
+                switch (id)
+                {
+                    case 1:
+                        receiveMessageQueue.Enqueue(new MessageTest().Deserialize<MessageTest>(bytes, 8));
+                        break;
+                }
+                
+            }
+        }
+    }
+
+    public void Send(BaseNetworkData data)
+    {
+        sendMessageQueue.Enqueue(data);
+    }
+
+    public void Disconnect()
+    {
+        isConnect = false;
     }
 }

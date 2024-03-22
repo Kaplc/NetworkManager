@@ -30,7 +30,7 @@ namespace Script.NetworkManager
 			return bytes;
 		}
 
-		public override T Deserialize<T>(byte[] bytes, ref int index)
+		public override T Deserialize<T>(byte[] bytes, int index)
 		{
 			enumTest = (EnumTest)ReadInt(bytes, ref index);
 			dataTest2 = ReadClass<DataTest2>(bytes, ref index);
