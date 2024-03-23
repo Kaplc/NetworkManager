@@ -68,8 +68,10 @@ public class NetworkManager : MonoBehaviour
 
             Debug.Log("connect success");
             // new thread check queue then send message
-            ThreadPool.QueueUserWorkItem(SendMessageThread);
-            ThreadPool.QueueUserWorkItem(ReceiveMessageThread);
+            // ThreadPool.QueueUserWorkItem(SendMessageThread);
+            // ThreadPool.QueueUserWorkItem(ReceiveMessageThread);
+            StartCoroutine(SendMessageThread());
+            StartCoroutine(ReceiveMessageThread());
         }
         catch (Exception e)
         {
@@ -79,7 +81,7 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    private void SendMessageThread(object state)
+    private IEnumerator SendMessageThread()
     {
         while (isConnect)
         {
@@ -88,10 +90,12 @@ public class NetworkManager : MonoBehaviour
                 byte[] bytes = sendMessageQueue.Dequeue().Serialize();
                 socket.Send(bytes);
             }
+            
+            yield return null;
         }
     }
 
-    private void ReceiveMessageThread(object state)
+    private IEnumerator ReceiveMessageThread()
     {
         while (isConnect)
         {
@@ -111,6 +115,8 @@ public class NetworkManager : MonoBehaviour
                 }
                 
             }
+
+            yield return null;
         }
     }
 
