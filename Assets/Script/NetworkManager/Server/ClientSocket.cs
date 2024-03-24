@@ -14,24 +14,35 @@ namespace Script.NetworkManager
         public Socket socket;
         private Server server;
 
-        private byte[] cacheBuffer = new byte[1024 * 1024]; // 分包粘包处理
+        #region handle package
+
+        private byte[] handlePackageCacheBuffer = new byte[1024 * 1024]; // 分包粘包处理
         private int cacheIndex = 0;
-        
+        private byte[] messageBuffer = new byte[1024 * 1024];
+
+        #endregion
+
+
+        #region heart message
+
         private int heartTime = 0;
         private int outTime = 3;
         private Timer timer;
 
-        public ClientSocket(Server server ,Socket socket)
+        #endregion
+
+
+        public ClientSocket(Server server, Socket socket)
         {
             guid = Guid.NewGuid().ToString();
             this.socket = socket;
             this.server = server;
-            
+
             // 创建一个定时器对象，设置时间间隔为1秒
             timer = new Timer(1000);
-        
+
             // 定义定时器的Elapsed事件处理方法
-            timer.Elapsed += (obj,args) =>
+            timer.Elapsed += (obj, args) =>
             {
                 heartTime += 1;
                 if (heartTime >= outTime)
@@ -65,37 +76,38 @@ namespace Script.NetworkManager
                 byte[] bytes = new byte[socket.Available];
                 socket.Receive(bytes);
 
-                HandlePackage(bytes, bytes.Length);
+                HandlePackage(bytes);
             }
         }
 
-        private void HandlePackage(byte[] bytes, int byteLength)
+        private void HandlePackage(byte[] bytes)
         {
-            int id;
-            int length = 0;
-
-            bytes.CopyTo(cacheBuffer, cacheIndex);
-            cacheIndex += byteLength;
+            int readIndex = 0;
+            
+            bytes.CopyTo(handlePackageCacheBuffer, cacheIndex);
+            cacheIndex += bytes.Length;
             while (true)
             {
-                id = BitConverter.ToInt32(cacheBuffer, 0);
-                length = BitConverter.ToInt32(cacheBuffer, 4);
+                // length data index is 4
+                int messageLength = BitConverter.ToInt32(handlePackageCacheBuffer, readIndex + 4);
 
-                if (cacheIndex < 8 || cacheIndex < length)
+                if (cacheIndex < 8 || cacheIndex < messageLength + readIndex)
                 {
                     // 被分包继续接收
                     break;
                 }
-
-                byte[] messageBytes = new byte[length];
-                Array.Copy(cacheBuffer, messageBytes, length);
-                ThreadPool.QueueUserWorkItem(HandlerThread, messageBytes);
                 
-                if (cacheIndex - length > 0)
+                // readIndex - 8 is the start of the message
+                Array.Copy(handlePackageCacheBuffer, readIndex, messageBuffer, 0, messageLength);
+                ThreadPool.QueueUserWorkItem(HandlerThread, messageBuffer);
+
+                if (cacheIndex >  messageLength + readIndex)
                 {
                     // 未处理移动到缓存区开头
-                    Array.Copy(cacheBuffer, length, cacheBuffer, 0, cacheIndex - length);
-                    cacheIndex -= length;
+                    // Array.Copy(handlePackageCacheBuffer, messageLength, handlePackageCacheBuffer, 0, cacheIndex - messageLength);
+                    // cacheIndex -= messageLength;
+
+                    readIndex += messageLength;
                 }
                 else
                 {
@@ -109,7 +121,7 @@ namespace Script.NetworkManager
         private void HandlerThread(object state)
         {
             int id = BitConverter.ToInt32((byte[])state, 0);
-            
+
             switch (id)
             {
                 case 1:
