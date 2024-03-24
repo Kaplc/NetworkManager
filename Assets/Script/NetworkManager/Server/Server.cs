@@ -20,11 +20,7 @@ public enum ENetworkType
 
 public class Server
 {
-    public string ip = "127.0.0.1";
-    public int port = 8800;
     public int maxClientCount = 999;
-    
-    public ENetworkType eNetworkType = ENetworkType.TcpV4;
     private Socket serverSocket;
     private Dictionary<string, ClientSocket> clientSocketsDic = new Dictionary<string, ClientSocket>();
     private bool isClose;
@@ -32,10 +28,13 @@ public class Server
     [Header("广播消息")] public string broadcastInfo;
     public bool send;
 
+    public Queue<ClientSocket> willRemoveClientSockets = new Queue<ClientSocket>();
+
+
     // Start is called before the first frame update
-    public void Start()
+    public void Start(string ip, ENetworkType type)
     {
-        switch (eNetworkType)
+        switch (type)
         {
             case ENetworkType.TcpV4:
                 serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -50,15 +49,37 @@ public class Server
                 serverSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
                 break;
         }
-        
+
         // bind server ip
-        IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+        IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse(ip), 8800);
         serverSocket.Bind(ipEndPoint);
         // max client count
         serverSocket.Listen(maxClientCount);
 
         ThreadPool.QueueUserWorkItem(AcceptThread);
         ThreadPool.QueueUserWorkItem(ReceiveThread);
+        ThreadPool.QueueUserWorkItem(RemoveClientSocket);
+
+        Debug.Log("server start success at " + ip + ":" + 8800);
+    }
+
+    private void RemoveClientSocket(object args)
+    {
+        while (!isClose)
+        {
+            if (willRemoveClientSockets.Count > 0)
+            {
+                ClientSocket clientSocket = willRemoveClientSockets.Dequeue();
+                lock (clientSocketsDic)
+                {
+                    if (clientSocketsDic.ContainsValue(clientSocket))
+                    {
+                        clientSocketsDic.Remove(clientSocket.guid);
+                        clientSocket.Close();
+                    }
+                }
+            }
+        }
     }
 
     private void AcceptThread(object state)
@@ -70,12 +91,12 @@ public class Server
                 // Accept() is blocking func
                 Socket client = serverSocket.Accept();
                 //
-                ClientSocket clientSocket = new ClientSocket(client);
+                ClientSocket clientSocket = new ClientSocket(this, client);
                 lock (clientSocketsDic)
                 {
                     clientSocketsDic.Add(clientSocket.guid, clientSocket);
+                    Debug.Log($"accept client {clientSocket.guid} success");
                 }
-                
             }
             catch (Exception e)
             {
@@ -99,7 +120,6 @@ public class Server
                         clientSocket.Receive();
                     }
                 }
-                
             }
             catch (Exception e)
             {
@@ -110,16 +130,29 @@ public class Server
         }
     }
 
-    private void Broadcast()
+    public void Broadcast(BaseNetworkData data)
     {
-        foreach (ClientSocket clientSocket in clientSocketsDic.Values)
+        lock (clientSocketsDic)
         {
-            clientSocket.Send(broadcastInfo);
+            foreach (ClientSocket clientSocket in clientSocketsDic.Values)
+            {
+                clientSocket.Send(data);
+            }
         }
     }
 
-    private void OnDestroy()
+    public void Close()
     {
+        lock (clientSocketsDic)
+        {
+            foreach (ClientSocket clientSocket in clientSocketsDic.Values)
+            {
+                clientSocket.socket.Disconnect(false);
+                clientSocket.socket.Close();
+            }
+        }
+
+        serverSocket.Close();
         isClose = true;
     }
 }

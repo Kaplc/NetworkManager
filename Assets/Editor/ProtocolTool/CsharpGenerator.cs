@@ -627,7 +627,7 @@ namespace Editor.ProtocolTool
                 string usingText = "using System;\n" +
                                    "using System.Collections;\n" +
                                    "using System.Collections.Generic;\n" +
-                                   "using UnityEngine;\n";
+                                   "using System.Text;\n";
                 string namespaceText = message.Attributes["namespace"].Value;
                 string classNameText = message.Attributes["name"].Value;
                 string extendText = "";

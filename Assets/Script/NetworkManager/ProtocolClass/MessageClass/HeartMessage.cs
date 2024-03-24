@@ -5,10 +5,9 @@ using System.Text;
 
 namespace Script.NetworkManager
 {
-	public class MessageTest : BaseNetworkData
+	public class HeartMessage : BaseNetworkData
 	{
-		public int messageID = 1;
-		public int data = 1;
+		public int messageID = 99;
 
 		public override int GetSize()
 		{
@@ -16,7 +15,6 @@ namespace Script.NetworkManager
 			size += sizeof(int); // message id
 			size += sizeof(int); // message length
 
-			size += sizeof(int);
 
 			return size;
 		}
@@ -28,14 +26,12 @@ namespace Script.NetworkManager
 			WriteInt(messageID, bytes, ref index);
 			WriteInt(GetSize(), bytes, ref index);
 
-			WriteInt(data, bytes, ref index);
 
 			return bytes;
 		}
 
 		public override T Deserialize<T>(byte[] bytes, int index)
 		{
-			data = ReadInt(bytes, ref index);
 
 			return this as T;
 		}

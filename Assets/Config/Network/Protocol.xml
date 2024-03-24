@@ -32,4 +32,11 @@
         <field type="int" name="data2" value="1"/>
         <field type="DataTest5" name="t5"/>
     </message>
+    <message id="500" namespace="Script.NetworkManager" name="QuitMessage" extend="BaseNetworkData">
+    </message>
+    <message id="123" namespace="Script.NetworkManager" name="TextMessage" extend="BaseNetworkData">
+        <field type="string" name="text" value=""/>
+    </message>
+    <message id="99" namespace="Script.NetworkManager" name="HeartMessage" extend="BaseNetworkData">
+    </message>
 </NetworkData>

@@ -10,77 +10,57 @@ public class Main : MonoBehaviour
 {
     public Server server;
     public NetworkManager networkManager;
+    public TMP_InputField ipInputField;
     public TMP_InputField inputField;
-    public Button connectButton;
-    public Button disconnectButton;
+    public TMP_Dropdown dropdown;
     public Button sendButton;
+    public Button start;
+
+    private ENetworkType type;
 
     // Start is called before the first frame update
     void Start()
     {
-        connectButton.onClick.AddListener(() =>
+        dropdown.onValueChanged.AddListener((index) =>
         {
-            networkManager.Connect();
+            switch (index)
+            {
+                case 0:
+                    type = ENetworkType.TcpV4;
+                    break;
+                case 1:
+                    type = ENetworkType.TcpV6;
+                    break;
+                case 2:
+                    type = ENetworkType.UdpV4;
+                    break;
+                case 3:
+                    type = ENetworkType.UdpV6;
+                    break;
+            }
         });
         
-        disconnectButton.onClick.AddListener(() =>
+        start.onClick.AddListener(() =>
         {
-            networkManager.Disconnect();
+            server = new Server();
+            server.Start(ipInputField.text, type);
         });
-        
+
         sendButton.onClick.AddListener(() =>
         {
-            // networkManager.Send(inputField.text);
-            
-            MessageTest t1 = new MessageTest(); 
-            t1.data = 1;
-            byte[] bytes = t1.Serialize();
-            
-            byte[] bytes1 = new byte[10];
-            Array.Copy(bytes, 0, bytes1, 0, bytes1.Length);
-            
-            byte[] bytes2 = new byte[bytes.Length - 10];
-            Array.Copy(bytes, 10, bytes2, 0, bytes2.Length);
-            
-            MessageTest2 t2 = new MessageTest2();
-            t2.data2 = 2;
-            t2.t5 = new DataTest5();
-            byte[] bytes3 = t2.Serialize();
-            byte[] b4 = new byte[5];
-            Array.Copy(bytes3, b4, 5);
-            byte[] b5 = new byte[bytes3.Length - 5];
-            Array.Copy(bytes3, 5, b5, 0, b5.Length);
+            if (inputField.text == "")
+            {
+                return;
+            }
 
-            networkManager.socket.Send(bytes1);
-            networkManager.socket.Send(bytes2);
-            
-            networkManager.socket.Send(bytes1);
-            networkManager.socket.Send(bytes2);
-            
-            networkManager.socket.Send(b4);
-            networkManager.socket.Send(b5);
-            
-            networkManager.socket.Send(bytes1);
-            networkManager.socket.Send(bytes2);
+            TextMessage message = new TextMessage();
+            message.text = inputField.text;
+            server.Broadcast(message);
         });
-
-        server = new Server();
-        server.Start();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDestroy()
     {
-        if (networkManager.isConnect)
-        {
-            disconnectButton.gameObject.SetActive(true);
-            connectButton.gameObject.SetActive(false);
-            
-        }
-        else
-        {
-            connectButton.gameObject.SetActive(true);
-            disconnectButton.gameObject.SetActive(false);
-        }
+        server?.Close();
     }
 }
