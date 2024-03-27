@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Main : MonoBehaviour
+public class ServerPanel : MonoBehaviour
 {
     public Server server;
     public NetworkManager networkManager;
