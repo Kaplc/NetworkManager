@@ -11,18 +11,33 @@ using Timer = System.Timers.Timer;
 
 public class NetworkManager : MonoBehaviour
 {
-    #region socket args 
+    #region socket args
 
     public string serverIp;
     public int serverPort = 8800;
     public bool isConnect;
 
-    private IPEndPoint ipEndPoint;
-    public ENetworkType clientType;
+    private ENetworkType networkType;
     public Socket socket;
 
+    #region tcp
+
+    private IPEndPoint serverIPEndPoint;
+
     #endregion
-    
+
+    #region udp
+
+    private int udpCacheBytesLength = 1024 * 1024;
+
+    private IPEndPoint localIPEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9999);
+    private IPEndPoint sendToIPEndPoint;
+    private EndPoint receiveFromEndPoint = new IPEndPoint(IPAddress.Any, 0);
+
+    #endregion
+
+    #endregion
+
     #region container
 
     private Queue<BaseNetworkData> sendMessageQueue = new();
@@ -30,13 +45,13 @@ public class NetworkManager : MonoBehaviour
 
     #endregion
 
-    #region package heandle
+    #region package handle
 
-    private byte[] cacheBuffer = new byte[1024 * 1024]; // 分包粘包处理
-    private int cacheIndex = 0;
+    private byte[] handlePackageCacheBuffer = new byte[1024 * 1024]; // 分包粘包处理
+    private int cacheIndex;
 
     #endregion
-    
+
     #region heart
 
     private Timer timer;
@@ -44,17 +59,17 @@ public class NetworkManager : MonoBehaviour
     #endregion
 
     #region sync
-
-    private byte[] syncCacheBuffer = new byte[1024 * 1024];
+    
+    
 
     #endregion
-    
+
     #region async
-    
-    private byte[] asyncCacheBuffer = new byte[1024 * 1024]; 
+
+    private byte[] asyncReceiveCacheBuffer = new byte[1024 * 1024];
 
     #endregion
-    
+
 
     // Start is called before the first frame update
     void Awake()
@@ -84,7 +99,6 @@ public class NetworkManager : MonoBehaviour
                     Debug.Log($"server: {data}");
                     break;
             }
-
         }
     }
 
@@ -115,24 +129,38 @@ public class NetworkManager : MonoBehaviour
                     break;
             }
 
-            ipEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
+            serverIPEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
             // async connect
-            SocketAsyncEventArgs connectArgs = new SocketAsyncEventArgs();
-            connectArgs.RemoteEndPoint = ipEndPoint;
-            connectArgs.Completed += (sender, args) =>
+            SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+            args.RemoteEndPoint = serverIPEndPoint;
+            args.Completed += (sender, args) =>
             {
                 if (args.SocketError == SocketError.Success)
                 {
                     isConnect = true;
                     Debug.Log("connect success");
-                    
+
                     // set args
                     SocketAsyncEventArgs receiveArgs = new SocketAsyncEventArgs();
-                    receiveArgs.SetBuffer(asyncCacheBuffer, 0, asyncCacheBuffer.Length);
-                    receiveArgs.Completed += ReceiveAsyncCallBack;
+                    receiveArgs.SetBuffer(asyncReceiveCacheBuffer, 0, asyncReceiveCacheBuffer.Length);
+                    receiveArgs.Completed += (sender, args) =>
+                    {
+                        // receive message success
+                        if (args.SocketError == SocketError.Success)
+                        {
+                            HandlePackage(args.Buffer, args.BytesTransferred);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("receive message fail: " + args.SocketError);
+                        }
+
+                        // continue receive
+                        socket.ReceiveAsync(args);
+                    };
                     // start async receive
                     socket.ReceiveAsync(receiveArgs);
-                
+
                     // start heart message timer
                     timer.Start();
                 }
@@ -142,6 +170,7 @@ public class NetworkManager : MonoBehaviour
                     isConnect = false;
                 }
             };
+            socket.ConnectAsync(args);
         }
         catch (Exception e)
         {
@@ -152,23 +181,31 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    private void ReceiveAsyncCallBack(object socket, SocketAsyncEventArgs args)
+    public void SendAsync(BaseNetworkData data)
     {
-        if (args.SocketError == SocketError.Success)
-        {
-            HandlePackage(args.Buffer);
-        }
-        else
-        {
-              Debug.LogError("receive message fail");   
-        }
+        byte[] bytes = data.Serialize();
+        SocketAsyncEventArgs sendArgs = new SocketAsyncEventArgs();
+        sendArgs.SetBuffer(bytes, 0, bytes.Length);
+        socket.SendAsync(sendArgs);
+    }
+
+    public void SendAsync(byte[] bytes)
+    {
+        SocketAsyncEventArgs sendArgs = new SocketAsyncEventArgs();
+        sendArgs.SetBuffer(bytes, 0, bytes.Length);
+        socket.SendAsync(sendArgs);
+    }
+
+    public void SendToAsync(BaseNetworkData data)
+    {
+        
     }
 
     #endregion
 
     #region sync
 
-    public bool Connect(string ip, ENetworkType clientType)
+    public bool Connect(string ip, ENetworkType type)
     {
         if (isConnect || string.IsNullOrEmpty(ip))
         {
@@ -177,33 +214,37 @@ public class NetworkManager : MonoBehaviour
 
         try
         {
-            switch (clientType)
+            serverIPEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
+            networkType = type;
+            switch (networkType)
             {
                 case ENetworkType.TcpV4:
                     socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    socket.Connect(serverIPEndPoint);
                     break;
                 case ENetworkType.TcpV6:
                     socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+                    socket.Connect(serverIPEndPoint);
                     break;
                 case ENetworkType.UdpV4:
                     socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                    socket.Bind(localIPEndPoint);
                     break;
                 case ENetworkType.UdpV6:
                     socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
+                    socket.Bind(localIPEndPoint);
                     break;
             }
 
-            ipEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
 
-            socket.Connect(ipEndPoint);
             isConnect = true;
 
             Debug.Log("connect success");
             // new thread check queue then send message
             ThreadPool.QueueUserWorkItem(SendMessageThread);
             ThreadPool.QueueUserWorkItem(ReceiveMessageThread);
-            
-            // heart message
+
+            // send heart message
             // timer.Start();
             return true;
         }
@@ -216,6 +257,19 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    public void Send(BaseNetworkData data)
+    {
+        sendMessageQueue.Enqueue(data);
+    }
+
+    public void SendTo(BaseNetworkData data, IPEndPoint ipEndPoint)
+    {
+        sendToIPEndPoint = ipEndPoint;
+        sendMessageQueue.Enqueue(data);
+    }
+
+    #region thread
+
     private void SendMessageThread(object args)
     {
         while (isConnect)
@@ -223,7 +277,18 @@ public class NetworkManager : MonoBehaviour
             if (sendMessageQueue.Count > 0)
             {
                 byte[] bytes = sendMessageQueue.Dequeue().Serialize();
-                socket.Send(bytes);
+
+                switch (networkType)
+                {
+                    case ENetworkType.TcpV4:
+                    case ENetworkType.TcpV6:
+                        socket.Send(bytes);
+                        break;
+                    case ENetworkType.UdpV4:
+                    case ENetworkType.UdpV6:
+                        socket.SendTo(bytes, sendToIPEndPoint);
+                        break;
+                }
             }
         }
     }
@@ -235,45 +300,56 @@ public class NetworkManager : MonoBehaviour
             // will receive message
             if (socket.Available > 0)
             {
-                byte[] bytes = new byte[socket.Available];
-                socket.Receive(bytes);
-                
-                HandlePackage(bytes);
+                switch (networkType)
+                {
+                    case ENetworkType.TcpV4:
+                    case ENetworkType.TcpV6:
+                        byte[] bytes = new byte[socket.Available];
+                        socket.Receive(bytes);
+                        HandlePackage(bytes, bytes.Length);
+                        break;
+                    case ENetworkType.UdpV4:
+                    case ENetworkType.UdpV6:
+                        byte[] udpBytes = new byte[udpCacheBytesLength];
+                        socket.ReceiveFrom(udpBytes, ref receiveFromEndPoint);
+                        ThreadPool.QueueUserWorkItem(HandlerThread, udpBytes);
+                        break;
+                }
             }
         }
     }
 
     #endregion
 
+    #endregion
+
     #region handle data
 
-    private void HandlePackage(byte[] bytes)
+    private void HandlePackage(byte[] bytes, int dataLength)
     {
-        int id;
-        int length = 0;
+        int readIndex = 0;
 
-        bytes.CopyTo(cacheBuffer, cacheIndex);
-        cacheIndex += bytes.Length;
+        Array.Copy(bytes, 0, handlePackageCacheBuffer, cacheIndex, dataLength);
+        cacheIndex += dataLength;
         while (true)
         {
-            id = BitConverter.ToInt32(cacheBuffer, 0);
-            length = BitConverter.ToInt32(cacheBuffer, 4);
+            // length data index is 4
+            int messageLength = BitConverter.ToInt32(handlePackageCacheBuffer, readIndex + 4);
 
-            if (cacheIndex < 8 || cacheIndex < length)
+            if (cacheIndex < 8 || cacheIndex < messageLength + readIndex)
             {
                 // 被分包继续接收
                 break;
             }
 
-            byte[] messageBytes = new byte[length];
-            Array.Copy(cacheBuffer, messageBytes, length);
-            ThreadPool.QueueUserWorkItem(HandlerThread, messageBytes);
+            byte[] messageBuffer = new byte[messageLength];
+            Array.Copy(handlePackageCacheBuffer, readIndex, messageBuffer, 0, messageLength);
+            ThreadPool.QueueUserWorkItem(HandlerThread, messageBuffer);
 
-            if (cacheIndex - length > 0)
+            if (cacheIndex > messageLength + readIndex)
             {
-                // 未处理移动到缓存区开头
-                Array.Copy(cacheBuffer, length, cacheBuffer, 0, cacheIndex - length);
-                cacheIndex -= length;
+                // move index to next message data start index
+                readIndex += messageLength;
             }
             else
             {
@@ -286,32 +362,36 @@ public class NetworkManager : MonoBehaviour
 
     private void HandlerThread(object state)
     {
-        int id = BitConverter.ToInt32((byte[])state, 0);
-
-        switch (id)
+        try
         {
-            case 1:
-                MessageTest test = new MessageTest().Deserialize<MessageTest>((byte[])state, 8);
-                Debug.Log($"client: {test.data}");
-                break;
-            case 2:
-                MessageTest2 test2 = new MessageTest2().Deserialize<MessageTest2>((byte[])state, 8);
-                Debug.Log($"client: {test2.data2} {test2.t5.enumTest}");
-                break;
-            case 123:
-                TextMessage textMessage = new TextMessage().Deserialize<TextMessage>((byte[])state, 8);
-                Debug.Log($"client: {textMessage.text}");
-                break;
+            int id = BitConverter.ToInt32((byte[])state, 0);
+
+            switch (id)
+            {
+                case 1:
+                    MessageTest test = new MessageTest().Deserialize<MessageTest>((byte[])state, 8);
+                    Debug.Log($"server: {test.data}");
+                    break;
+                case 2:
+                    MessageTest2 test2 = new MessageTest2().Deserialize<MessageTest2>((byte[])state, 8);
+                    Debug.Log($"server: {test2.data2} {test2.t5.enumTest}");
+                    break;
+                case 123:
+                    TextMessage textMessage = new TextMessage().Deserialize<TextMessage>((byte[])state, 8);
+                    Debug.Log($"server: {textMessage.text}");
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("deserialize fail");
+            Debug.Log(e);
+            throw;
         }
     }
 
     #endregion
-    
-    
-    public void Send(BaseNetworkData data)
-    {
-        sendMessageQueue.Enqueue(data);
-    }
+
 
     public void Disconnect()
     {
