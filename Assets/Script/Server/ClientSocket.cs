@@ -16,7 +16,7 @@ namespace Script.NetworkManager
         public Socket socket;
         private Server server;
         public IPEndPoint ipEndPoint;
-        private ENetworkType type;
+        public ENetworkType type;
 
         #region handle package
 
@@ -86,26 +86,23 @@ namespace Script.NetworkManager
 
         public void Send(BaseNetworkData data)
         {
-            if (type != ENetworkType.TcpV4 || type != ENetworkType.TcpV6)
+            if (type == ENetworkType.TcpV4 || type == ENetworkType.TcpV6)
             {
-                return;
+                socket.Send(data.Serialize());
             }
-            socket.Send(data.Serialize());
         }
 
         public void Receive()
         {
-            if (type != ENetworkType.TcpV4 || type != ENetworkType.TcpV6)
+            if (type == ENetworkType.TcpV4 || type == ENetworkType.TcpV6)
             {
-                return;
-            }
+                if (socket.Available > 0)
+                {
+                    byte[] bytes = new byte[socket.Available];
+                    socket.Receive(bytes);
 
-            if (socket.Available > 0)
-            {
-                byte[] bytes = new byte[socket.Available];
-                socket.Receive(bytes);
-
-                HandlePackage(bytes, bytes.Length);
+                    HandlePackage(bytes, bytes.Length);
+                }
             }
         }
 

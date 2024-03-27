@@ -115,7 +115,6 @@ public class Server
             {
                 Debug.LogError($"accept error");
                 Debug.LogError(e);
-                throw;
             }
         }
     }
@@ -241,8 +240,14 @@ public class Server
         {
             foreach (ClientSocket clientSocket in clientSocketsDic.Values)
             {
-                clientSocket.Send(data);
-                serverSocket.SendTo(data.Serialize(), clientSocket.ipEndPoint);
+                if (clientSocket.type == ENetworkType.TcpV4 || clientSocket.type == ENetworkType.TcpV6)
+                {
+                    clientSocket.Send(data);
+                }
+                else
+                {
+                    serverSocket.SendTo(data.Serialize(), clientSocket.ipEndPoint);
+                }
             }
         }
     }

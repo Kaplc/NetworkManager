@@ -2124,7 +2124,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9306837f3eea4429b96509195eb3da82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkManager: {fileID: 621686649}
   inputField: {fileID: 1408932721}
   ipInputField: {fileID: 414459108}
   textMeshPro: {fileID: 463062829}
@@ -2305,7 +2304,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 621686650}
-  - component: {fileID: 621686649}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -2313,22 +2311,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &621686649
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 621686648}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df3ba85335795b847a09673b93b8549d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serverIp: 240e:47c:a70:38e6:686f:f36d:3588:8fcc
-  serverPort: 8800
-  isConnect: 0
-  clientType: 0
 --- !u!4 &621686650
 Transform:
   m_ObjectHideFlags: 0
@@ -4883,7 +4865,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db6b26e8a4c3e6e4391935257a3b6b9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkManager: {fileID: 621686649}
   ipInputField: {fileID: 1687162291}
   inputField: {fileID: 237271453}
   dropdown: {fileID: 310503563}

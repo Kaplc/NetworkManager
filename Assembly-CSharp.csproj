@@ -41,7 +41,7 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Assets\Script\NetworkManager\ServerPanel.cs" />
+    <Compile Include="Assets\Script\ServerPanel.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\MessageClass\MessageTest.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\MessageClass\TextMessage.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest2.cs" />
@@ -50,15 +50,17 @@
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest5.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest4.cs" />
     <Compile Include="Assets\Script\NetworkManager\NetworkManager.cs" />
-    <Compile Include="Assets\Script\NetworkManager\ClientPanel.cs" />
-    <Compile Include="Assets\Script\NetworkManager\Message1.cs" />
+    <Compile Include="Assets\Script\ClientPanel.cs" />
+    <Compile Include="Assets\Script\Message1.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\Enum\EnumTest.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest.cs" />
-    <Compile Include="Assets\Script\NetworkManager\BaseNetworkData.cs" />
+    <Compile Include="Assets\Script\NetworkManager\Base\BaseNetworkData.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\MessageClass\MessageTest2.cs" />
-    <Compile Include="Assets\Script\NetworkManager\Server\ClientSocket.cs" />
-    <Compile Include="Assets\Script\NetworkManager\Server\Server.cs" />
+    <Compile Include="Assets\Script\Server\ClientSocket.cs" />
+    <Compile Include="Assets\Script\Server\Server.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest3.cs" />
+    <Compile Include="Assets\Script\NetworkManager\UDP\UdpManager.cs" />
+    <Compile Include="Assets\Script\NetworkManager\TCP\TCPManager.cs" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
