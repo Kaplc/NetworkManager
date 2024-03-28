@@ -1,7 +1,9 @@
 using System.Net;
+using Script.NetworkManager.FTP;
 using Script.NetworkManager.TCP;
 using Script.NetworkManager.UDP;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Script.NetworkManager
 {
@@ -12,68 +14,64 @@ namespace Script.NetworkManager
     }
     public class NetworkManager
     {
-        private TcpManager tcpManager;
-        private UdpManager udpManager;
+        public TcpManager tcpManager;
+        public UdpManager udpManager;
+        public FtpManager ftpManager;
 
+        #region ftp
 
-        public NetworkManager(ENetworkType type, EAsyncType asyncType, IPEndPoint remoteIPEndPoint = null)
+        public void InitFtpManager(string ftpServerIP, string ftpUserID, string ftpPassword)
         {
-            switch (type)
-            {
-                case ENetworkType.TcpV4:
-                    tcpManager = new TcpManager(ENetworkType.TcpV4, asyncType, remoteIPEndPoint);
-                    break;
-                case ENetworkType.TcpV6:
-                    tcpManager = new TcpManager(ENetworkType.TcpV6, asyncType, remoteIPEndPoint);
-                    break;
-                case ENetworkType.UdpV4:
-                    udpManager = new UdpManager(ENetworkType.UdpV4, asyncType);
-                    break;
-                case ENetworkType.UdpV6:
-                    udpManager = new UdpManager(ENetworkType.UdpV6, asyncType);
-                    break;
-            }
+            ftpManager = new FtpManager(ftpServerIP, ftpUserID, ftpPassword);
         }
+        
+        public void UploadFile(string localFile, string remoteFile, UnityAction callBack = null)
+        {
+            if (ftpManager == null)
+            {
+                Debug.LogError("ftp manager is null");
+                return;
+            }
+            
+            ftpManager.UploadFile(localFile, remoteFile, callBack);
+        }
+
+        #endregion
+        
 
         #region tcp
-
-        public void Connect()
+        
+        public void InitTcpManager(ENetworkType type, EAsyncType asyncType, IPEndPoint remoteIPEndPoint)
         {
-            if (tcpManager != null)
-            {
-                tcpManager.Connect();
-            }
-            else
-            {
-                Debug.LogError("udp manager have not connect method");
-            }
-        }
-
-        public void Disconnect()
-        {
-            tcpManager?.Disconnect();
-            udpManager?.Close();
-        }
-
-        public void Send(BaseNetworkData data)
-        {
-            tcpManager.Send(data);
+            tcpManager = new TcpManager(type, asyncType, remoteIPEndPoint);
         }
 
         #endregion
 
         #region udp
         
-        public void Start()
+        public void InitUdpManager(ENetworkType type, EAsyncType asyncType)
         {
-            udpManager?.Start();
-        }
-
-        public void SendTo(BaseNetworkData data, IPEndPoint ipEndPoint)
-        {
-            udpManager.SendTo(data, ipEndPoint);
+            udpManager = new UdpManager(type, asyncType);
         }
 
         #endregion
+        
+        public void CloseTcp()
+        {
+            tcpManager?.Disconnect();
+            tcpManager = null;
+        }
+        
+        public void CloseFtp()
+        {
+            ftpManager = null;
+        }
+        
+        public void CloseUdp()
+        {
+            udpManager?.Close();
+            udpManager = null;
+        }
     }
 }

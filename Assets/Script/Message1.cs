@@ -15,7 +15,7 @@ namespace Script.NetworkManager
             size += sizeof(int) + Encoding.UTF8.GetByteCount(abc);
             
             size += sizeof(int);
-            foreach (string item in strList)
+            foreach (string item in strList) 
             {
                 size += sizeof(int) + Encoding.UTF8.GetByteCount(item);
             }
@@ -24,7 +24,7 @@ namespace Script.NetworkManager
             foreach (KeyValuePair<string, string> item in strDic)
             {
                 size += sizeof(int) + Encoding.UTF8.GetByteCount(item.Key);
-                size += sizeof(int) + Encoding.UTF8.GetByteCount(item.Value);
+                size += sizeof(int) + Encoding.UTF8.GetByteCount(item.Value); 
             }
             
             return size;

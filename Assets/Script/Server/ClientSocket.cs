@@ -176,7 +176,7 @@ namespace Script.NetworkManager
 
                 if (cacheIndex >  messageLength + readIndex)
                 {
-                    // move index to next message data start index
+                    // move index to next message data btnStart index
                     readIndex += messageLength;
                 }
                 else

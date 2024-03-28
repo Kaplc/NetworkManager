@@ -14,25 +14,74 @@ public class ClientPanel : MonoBehaviour
     public TMP_InputField inputField;
     public TMP_InputField ipInputField;
     public TMP_Text textMeshPro;
+    public TMP_Dropdown dropdown;
     public Button connectButton;
     public Button disconnectButton;
     public Button sendButton;
+    
+    private ENetworkType type;
 
     // Start is called before the first frame update
     void Start()
     {
+        dropdown.onValueChanged.AddListener((index) =>
+        {
+            switch (index)
+            {
+                case 0:
+                    type = ENetworkType.TcpV4;
+                    break;
+                case 1:
+                    type = ENetworkType.TcpV6;
+                    break;
+                case 2:
+                    type = ENetworkType.UdpV4;
+                    break;
+                case 3:
+                    type = ENetworkType.UdpV6;
+                    break;
+            }
+        });
+        
         connectButton.onClick.AddListener(() =>
         {
-            // networkManager = new NetworkManager(ENetworkType.TcpV4, EAsyncType.Thread, new IPEndPoint(IPAddress.Parse(ipInputField.text), 8800));
-            // networkManager.Connect();
-            networkManager = new NetworkManager(ENetworkType.UdpV4, EAsyncType.AsyncFunc);
-            networkManager.Start();
+            switch (type)
+            {
+                case ENetworkType.TcpV4:
+                    networkManager = new NetworkManager();
+                    networkManager.InitTcpManager(ENetworkType.TcpV4, EAsyncType.Thread, new IPEndPoint(IPAddress.Parse(ipInputField.text), 8800));
+                    networkManager.tcpManager.Connect();
+                    break;
+                case ENetworkType.TcpV6:
+                    networkManager = new NetworkManager();
+                    networkManager.InitTcpManager(ENetworkType.TcpV6, EAsyncType.Thread, new IPEndPoint(IPAddress.Parse(ipInputField.text), 8800));
+                    networkManager.tcpManager.Connect();
+                    break;
+                case ENetworkType.UdpV4:
+                case ENetworkType.UdpV6:
+                    networkManager = new NetworkManager();
+                    networkManager.InitUdpManager(type, EAsyncType.Thread);
+                    networkManager.udpManager.Start();
+                    break;
+            }
+
             disconnectButton.gameObject.SetActive(true);
         });
 
         disconnectButton.onClick.AddListener(() =>
         {
-            networkManager.Disconnect();
+            switch (type)
+            {
+                case ENetworkType.TcpV4:
+                case ENetworkType.TcpV6:
+                    networkManager.CloseTcp();
+                    break;
+                case ENetworkType.UdpV4:
+                case ENetworkType.UdpV6:
+                    networkManager.CloseUdp();
+                    break;
+            }
+            
             disconnectButton.gameObject.SetActive(false);
         });
         
@@ -79,7 +128,7 @@ public class ClientPanel : MonoBehaviour
             byte[] b5 = new byte[bytes3.Length - 5];
             Array.Copy(bytes3, 5, b5, 0, b5.Length);
             
-            networkManager.SendTo(t1, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8800));
+            networkManager.udpManager.SendTo(t1, new IPEndPoint(IPAddress.Parse(ipInputField.text), 8800));
             // networkManager.socket.Send(bytes1);
             // networkManager.socket.Send(bytes2);
             //
@@ -112,6 +161,6 @@ public class ClientPanel : MonoBehaviour
 
     private void OnDestroy()
     {
-        networkManager.Disconnect();
+        disconnectButton.onClick.Invoke();
     }
 }

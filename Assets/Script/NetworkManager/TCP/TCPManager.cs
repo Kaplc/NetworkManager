@@ -132,10 +132,10 @@ namespace Script.NetworkManager.TCP
                             // continue receive
                             socket.ReceiveAsync(receiveArgs);
                         };
-                        // start async receive
+                        // btnStart async receive
                         socket.ReceiveAsync(receiveArgs);
 
-                        // start heart message timer
+                        // btnStart heart message timer
                         timer.Start();
                     }
                     else
@@ -212,7 +212,7 @@ namespace Script.NetworkManager.TCP
 
                 if (cacheIndex > messageLength + readIndex)
                 {
-                    // move index to next message data start index
+                    // move index to next message data btnStart index
                     readIndex += messageLength;
                 }
                 else
@@ -280,6 +280,7 @@ namespace Script.NetworkManager.TCP
             timer.Close();
             socket.Disconnect(false);
             socket.Close();
+            socket.Dispose();
         }
     }
 }

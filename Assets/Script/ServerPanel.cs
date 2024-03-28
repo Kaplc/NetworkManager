@@ -14,7 +14,8 @@ public class ServerPanel : MonoBehaviour
     public TMP_InputField inputField;
     public TMP_Dropdown dropdown;
     public Button sendButton;
-    public Button start;
+    public Button btnStart;
+    public Button btnStop;
 
     private ENetworkType type;
 
@@ -40,11 +41,19 @@ public class ServerPanel : MonoBehaviour
             }
         });
         
-        start.onClick.AddListener(() =>
+        btnStart.onClick.AddListener(() =>
         {
             server = new Server();
             server.Start(ipInputField.text, type);
+            btnStop.gameObject.SetActive(true);
         });
+        
+        btnStop.onClick.AddListener(() =>
+        {
+            server.Close();
+            btnStop.gameObject.SetActive(false);
+        });
+        btnStop.gameObject.SetActive(false);
 
         sendButton.onClick.AddListener(() =>
         {

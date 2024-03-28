@@ -57,12 +57,15 @@ namespace Script.NetworkManager.UDP
             }
 
             isStart = true;
-            Debug.Log("udp start success");
+            Debug.Log("udp btnStart success");
         }
 
         public void Close()
         {
             isStart = false;
+            socket.Close();
+            socket.Dispose();
+            socket = null;
         }
 
         public void SendTo(BaseNetworkData data, IPEndPoint remoteIPEndPoint)
@@ -131,7 +134,7 @@ namespace Script.NetworkManager.UDP
         #endregion
 
         #region ThreadAsync
-
+        
         private void SendMessageThread(object args)
         {
             while (isStart)
