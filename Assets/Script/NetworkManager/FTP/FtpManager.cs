@@ -51,5 +51,40 @@ namespace Script.NetworkManager.FTP
                 }
             });
         }
+
+        public async void DownloadFile(string remoteFile, string localFile, UnityAction callBack)
+        {
+            await Task.Run(() =>
+            {
+                try
+                {
+                    FtpWebRequest request = FtpWebRequest.Create($"ftp://{ftpServerIP}/{remoteFile}") as FtpWebRequest;
+                    request.Credentials = new NetworkCredential(ftpUserID, ftpPassword);
+                    request.KeepAlive = false;
+                    request.Method = WebRequestMethods.Ftp.DownloadFile;
+                    request.UseBinary = true;
+                    request.Proxy = null;
+                    
+                    FtpWebResponse response = request.GetResponse() as FtpWebResponse;
+                    using (Stream responseStream = response.GetResponseStream())
+                    {
+                        FileStream fileStream = File.Create(localFile);
+                        responseStream.CopyTo(fileStream);
+                        
+                        fileStream.Close();
+                        responseStream.Close();
+                    }
+                    
+                    callBack?.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("download file error");
+                    Debug.LogError(e);
+                    throw;
+                }
+            });
+        }
+        
     }
 }

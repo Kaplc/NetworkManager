@@ -51,6 +51,7 @@
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest4.cs" />
     <Compile Include="Assets\Script\NetworkManager\UDP\UdpManager.cs" />
     <Compile Include="Assets\Script\NetworkManager\TCP\TCPManager.cs" />
+    <Compile Include="Assets\Script\FtpPanel.cs" />
     <Compile Include="Assets\Script\NetworkManager\NetworkManager.cs" />
     <Compile Include="Assets\Script\ClientPanel.cs" />
     <Compile Include="Assets\Script\Message1.cs" />
@@ -62,7 +63,6 @@
     <Compile Include="Assets\Script\Server\Server.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest3.cs" />
     <Compile Include="Assets\Script\NetworkManager\FTP\FtpManager.cs" />
-    <Compile Include="Assets\Script\FtpPanel.cs" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />

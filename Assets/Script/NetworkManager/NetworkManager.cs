@@ -24,17 +24,6 @@ namespace Script.NetworkManager
         {
             ftpManager = new FtpManager(ftpServerIP, ftpUserID, ftpPassword);
         }
-        
-        public void UploadFile(string localFile, string remoteFile, UnityAction callBack = null)
-        {
-            if (ftpManager == null)
-            {
-                Debug.LogError("ftp manager is null");
-                return;
-            }
-            
-            ftpManager.UploadFile(localFile, remoteFile, callBack);
-        }
 
         #endregion
         
