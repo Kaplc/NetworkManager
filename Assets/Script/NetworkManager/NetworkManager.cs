@@ -17,6 +17,16 @@ namespace Script.NetworkManager
         public TcpManager tcpManager;
         public UdpManager udpManager;
         public FtpManager ftpManager;
+        public HttpManager httpManager;
+
+        #region http
+
+        public void InitHttpManager()
+        {
+            httpManager = new HttpManager();
+        }
+
+        #endregion
 
         #region ftp
 
