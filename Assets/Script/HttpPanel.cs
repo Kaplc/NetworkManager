@@ -34,7 +34,7 @@ public class HttpPanel : MonoBehaviour
 
         btnPost.onClick.AddListener(() =>
         {
-            httpManager.UploadFile("http://192.168.43.189:8080/4.jpg", Application.dataPath + "/4.jpg", (code) =>
+            httpManager.UploadFile("http://192.168.43.189/", Application.dataPath + "/4.jpg", (code) =>
             {
                 if (code == HttpStatusCode.OK)
                 {

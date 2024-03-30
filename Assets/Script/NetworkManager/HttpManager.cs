@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
@@ -66,17 +68,20 @@ namespace Script.NetworkManager
                         HttpWebRequest request = HttpWebRequest.CreateHttp(remoteFileName);
                         request.Method = WebRequestMethods.Http.Post;
                         request.Timeout = 5000; // set timeout 5s
-                        request.ContentType = "application/octet-stream; charset=utf-8";
+                        request.ContentType = "multipart/form-data; charset=utf-8";
                         request.Credentials = new NetworkCredential("kaplc", "123456");
                         request.PreAuthenticate = true;
+                        request.Proxy = null!;
 
-                        string contentHead = "Content-Disposition: form-data; name=\"file\"; filename=\"" + localFileName + "\"\r\n";
-                        byte[] contentHeadBytes = System.Text.Encoding.UTF8.GetBytes(contentHead);
+                        string contentHead = $"\r\n--" + "kaplc" + "\r\n" +
+                                             $"Content-Disposition: form-data; name=\"file\"; filename=\"{localFileName}\"\r\n" +
+                                             $"Content-Type:application/octet-stream\r\n\r\n";
+                        byte[] contentHeadBytes = Encoding.UTF8.GetBytes(contentHead);
 
                         string contentEnd = "\r\n--" + "kaplc" + "--\r\n";
-                        byte[] contentEndBytes = System.Text.Encoding.UTF8.GetBytes(contentEnd);
+                        byte[] contentEndBytes = Encoding.UTF8.GetBytes(contentEnd);
                         
-                        using (var fileStream = System.IO.File.OpenRead(localFileName))
+                        using (var fileStream = File.OpenRead(localFileName))
                         {
                             request.ContentLength = contentHeadBytes.Length + fileStream.Length + contentEndBytes.Length;
                             
@@ -90,11 +95,11 @@ namespace Script.NetworkManager
                                 fileStream.Close();
                                 requestStream.Close();
                             }
-                            
-                            
                         }
-
-                        callBack?.Invoke(HttpStatusCode.OK);
+                        
+                        HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                        callBack?.Invoke(response.StatusCode);
+                        response.Close();
                 }
                 catch (Exception e)
                 {
