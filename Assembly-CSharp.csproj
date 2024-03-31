@@ -48,11 +48,13 @@
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest2.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\MessageClass\HeartMessage.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\MessageClass\QuitMessage.cs" />
+    <Compile Include="Assets\Script\UnityWebPanel.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest5.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest4.cs" />
     <Compile Include="Assets\Script\NetworkManager\UdpManager.cs" />
     <Compile Include="Assets\Script\NetworkManager\TCPManager.cs" />
     <Compile Include="Assets\Script\FtpPanel.cs" />
+    <Compile Include="Assets\Script\NetworkManager\UnityWWWManager.cs" />
     <Compile Include="Assets\Script\NetworkManager\NetworkManager.cs" />
     <Compile Include="Assets\Script\ClientPanel.cs" />
     <Compile Include="Assets\Script\Message1.cs" />
@@ -63,10 +65,10 @@
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\MessageClass\MessageTest2.cs" />
     <Compile Include="Assets\Script\Server\ClientSocket.cs" />
     <Compile Include="Assets\Script\Server\Server.cs" />
+    <Compile Include="Assets\Script\NetworkManager\UnityWebManager.cs" />
     <Compile Include="Assets\Script\NetworkManager\ProtocolClass\DataClass\DataTest3.cs" />
     <Compile Include="Assets\Script\NetworkManager\FtpManager.cs" />
-    <Compile Include="Assets\Script\UnityWebManager.cs" />
-    <Compile Include="Assets\Script\UnityWebPanel.cs" />
+    <Compile Include="Assets\Script\CustomDownloadHandler.cs" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />

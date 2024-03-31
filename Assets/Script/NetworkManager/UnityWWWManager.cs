@@ -8,22 +8,22 @@ using UnityEngine.Events;
 
 namespace Script.NetworkManager
 {
-    public class UnityWebManager : MonoBehaviour
+    public class UnityWWWManager : MonoBehaviour
     {
-        public static UnityWebManager instance;
-        public static UnityWebManager Instance => instance;
+        public static UnityWWWManager instance;
+        public static UnityWWWManager Instance => instance;
 
         private void Awake()
         {
             instance = this;
         }
 
-        public void WWWLoad<T>(string url, UnityAction<T> callBack) where T : class
+        public void WWWDownload<T>(string url, UnityAction<T> callBack) where T : class
         {
-            StartCoroutine(WWWLoadCoroutine<T>(url, callBack));
+            StartCoroutine(WWWDownloadCoroutine<T>(url, callBack));
         }
 
-        private IEnumerator WWWLoadCoroutine<T>(string url, UnityAction<T> callBack) where T : class
+        private IEnumerator WWWDownloadCoroutine<T>(string url, UnityAction<T> callBack) where T : class
         {
             WWW www = new WWW(url);
 
@@ -107,8 +107,7 @@ namespace Script.NetworkManager
         {
             StartCoroutine(WWWFormSendFieldCoroutine(url, fieldName, value, callBack));
         }
-
-        [Obsolete("Obsolete")]
+        
         private IEnumerator WWWFormSendFieldCoroutine(string url, string fieldName, string value, UnityAction<bool> callBack)
         {
             WWWForm wwwForm = new WWWForm();

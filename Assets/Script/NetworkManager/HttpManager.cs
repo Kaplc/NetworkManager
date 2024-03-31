@@ -10,14 +10,14 @@ namespace Script.NetworkManager
 {
     public class HttpManager
     {
-        public async void DownloadFile(string remoteFileName, string localFileName, UnityAction<HttpStatusCode> callBack)
+        public async void DownloadFile(string url, string localFileName, UnityAction<HttpStatusCode> callBack)
         {
             await Task.Run(() =>
             {
                 try
                 {
                     // check exist remote file
-                    HttpWebRequest request = HttpWebRequest.CreateHttp(remoteFileName);
+                    HttpWebRequest request = HttpWebRequest.CreateHttp(url);
                     request.Method = WebRequestMethods.Http.Head;
                     request.Timeout = 5000; // set timeout 5s
                     HttpWebResponse response = request.GetResponse() as HttpWebResponse;
@@ -26,7 +26,7 @@ namespace Script.NetworkManager
                     {
                         response.Close();
                         // start download file
-                        request = HttpWebRequest.CreateHttp(remoteFileName);
+                        request = HttpWebRequest.CreateHttp(url);
                         request.Method = WebRequestMethods.Http.Get;
                         request.Timeout = 5000; // set timeout 5s
                         response = request.GetResponse() as HttpWebResponse;
@@ -46,7 +46,7 @@ namespace Script.NetworkManager
                     }
                     else
                     {
-                        Debug.Log("remote file no exist");
+                        Debug.Log("remote file no exist: " + response.StatusCode);
                     }
                 }
                 catch (Exception e)
@@ -58,14 +58,14 @@ namespace Script.NetworkManager
             });
         }
 
-        public async void UploadFile(string remoteFileName, string localFileName, UnityAction<HttpStatusCode> callBack)
+        public async void UploadFile(string url, string remoteFileName, string localFileName, UnityAction<HttpStatusCode> callBack)
         {
             await Task.Run(() =>
             {
                 try
                 {
                         // start upload file
-                        HttpWebRequest request = HttpWebRequest.CreateHttp(remoteFileName);
+                        HttpWebRequest request = HttpWebRequest.CreateHttp(url);
                         request.Method = WebRequestMethods.Http.Post;
                         request.Timeout = 5000; // set timeout 5s
                         request.ContentType = "multipart/form-data; charset=utf-8";
@@ -74,7 +74,7 @@ namespace Script.NetworkManager
                         request.Proxy = null!;
 
                         string contentHead = $"\r\n--" + "kaplc" + "\r\n" +
-                                             $"Content-Disposition: form-data; name=\"file\"; filename=\"{localFileName}\"\r\n" +
+                                             $"Content-Disposition: form-data; name=\"file\"; filename=\"{remoteFileName}\"\r\n" +
                                              $"Content-Type:application/octet-stream\r\n\r\n";
                         byte[] contentHeadBytes = Encoding.UTF8.GetBytes(contentHead);
 

@@ -8,7 +8,7 @@ public class UnityWebPanel : MonoBehaviour
 {
     private string username = "kaplc";
     private string password = "123456";
-    
+
     public Button btnUpload;
     public Button btnDownload;
 
@@ -17,17 +17,11 @@ public class UnityWebPanel : MonoBehaviour
     {
         btnDownload.onClick.AddListener(() =>
         {
-            // UnityWebManager.Instance.WWWLoad<Texture>("http://192.168.43.189/1.jpg", (texture) =>
-            // {
-            //     Debug.Log(texture);
-            // });
+            // UnityWWWManager.Instance.WWWLoad<Texture>($"ftp://{username}:{password}@127.0.0.1/1.jpg", (texture) => { Debug.Log(texture); });
             
-            UnityWebManager.Instance.WWWLoad<Texture>($"ftp://{username}:{password}@127.0.0.1/1.jpg", (texture) =>
-            {
-                Debug.Log(texture);
-            });
+            // UnityWebManager.Instance.Download<Texture>($"ftp://{username}:{password}@127.0.0.1/1.jpg", (texture) => { Debug.Log(texture); });
         });
-        
+
         btnUpload.onClick.AddListener(() =>
         {
             // UnityWebManager.Instance.WWWFormUploadFile($"ftp://{username}:{password}@127.0.0.1/", Application.dataPath + "/4.jpg", (isSuccess) =>
@@ -37,8 +31,24 @@ public class UnityWebPanel : MonoBehaviour
             //         Debug.Log("success");
             //     }
             // });
+
+            // UnityWWWManager.Instance.WWWFormUploadFile("http://192.168.43.189/", Application.dataPath + "/4.jpg", (isSuccess) =>
+            // {
+            //     if (isSuccess)
+            //     {
+            //         Debug.Log("success");
+            //     }
+            // });
+
+            // UnityWebManager.Instance.UploadFile("http://192.168.43.189/", Application.dataPath + "/4.jpg", "4.jpg", (isSuccess) =>
+            // {
+            //     if (isSuccess)
+            //     {
+            //         Debug.Log("success");
+            //     }
+            // });
             
-            UnityWebManager.Instance.WWWFormUploadFile("http://192.168.43.189/", Application.dataPath + "/4.jpg", (isSuccess) =>
+            UnityWebManager.Instance.UploadFilePut($"ftp://{username}:{password}@127.0.0.1/", Application.dataPath + "/4.jpg", "5.jpg",(isSuccess) =>
             {
                 if (isSuccess)
                 {

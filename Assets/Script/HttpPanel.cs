@@ -16,10 +16,10 @@ public class HttpPanel : MonoBehaviour
     void Start()
     {
         httpManager = new HttpManager();
-        
+
         btnGet.onClick.AddListener(() =>
         {
-            httpManager.DownloadFile("http://192.168.43.189:8080/1.jpg", Application.dataPath + "/4.jpg", (code) =>
+            httpManager.DownloadFile("http://192.168.43.189/1.jpg", Application.dataPath + "/4.jpg", (code) =>
             {
                 if (code == HttpStatusCode.OK)
                 {
@@ -34,7 +34,7 @@ public class HttpPanel : MonoBehaviour
 
         btnPost.onClick.AddListener(() =>
         {
-            httpManager.UploadFile("http://192.168.43.189/", Application.dataPath + "/4.jpg", (code) =>
+            httpManager.UploadFile("http://192.168.43.189/", "4.jpg", Application.dataPath + "/4.jpg", (code) =>
             {
                 if (code == HttpStatusCode.OK)
                 {
@@ -45,7 +45,6 @@ public class HttpPanel : MonoBehaviour
                     Debug.Log("upload fail " + code);
                 }
             });
-            
         });
     }
 
