@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Google.Protobuf;
 using UnityEngine;
 using Timer = System.Timers.Timer;
 
@@ -37,7 +38,12 @@ namespace Script.NetworkManager.TCP
         #endregion
 
         #region heart
-
+        
+        private Protobuf.HeartMessage protoHeartMessage = new Protobuf.HeartMessage()
+        {
+            Id = 99
+        };
+        private HeartMessage heartMessage = new HeartMessage();
         private Timer timer;
 
         #endregion
@@ -80,8 +86,8 @@ namespace Script.NetworkManager.TCP
                 timer = new Timer(1000);
                 timer.Elapsed += (obj, args) =>
                 {
-                    HeartMessage heartMessage = new HeartMessage();
-                    socket.Send(heartMessage.Serialize());
+                    // socket.Send(heartMessage.Serialize());
+                    socket.Send(protoHeartMessage.ToByteArray());
                 };
                 timer.Start();
             }
