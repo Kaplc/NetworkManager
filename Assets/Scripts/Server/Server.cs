@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Network.Base;
+using Network.ProtocolClass;
 using Script.NetworkManager;
 using UnityEditor;
 using UnityEngine;
@@ -24,6 +26,7 @@ public class Server
     private Socket serverSocket;
     private Dictionary<string, ClientSocket> clientSocketsDic = new Dictionary<string, ClientSocket>();
     private bool isClose;
+    private MessagePool messagePool;
 
     [Header("广播消息")] public string broadcastInfo;
     public bool send;
@@ -70,6 +73,9 @@ public class Server
 
         // async accept
         // ServerAcceptAsync();
+        
+        // 
+        messagePool = new MessagePool();
 
         Debug.Log("server start success at " + ip + ":" + 8800);
     }
@@ -104,7 +110,7 @@ public class Server
                 // Accept() is blocking func
                 Socket client = serverSocket.Accept();
                 // 
-                ClientSocket clientSocket = new ClientSocket(this, client);
+                ClientSocket clientSocket = new ClientSocket(this, client, messagePool);
                 lock (clientSocketsDic)
                 {
                     clientSocketsDic.Add(clientSocket.guid, clientSocket);
@@ -145,7 +151,7 @@ public class Server
                         if (!clientSocketsDic.ContainsKey(ipEndPoint.Address + ":" + ipEndPoint.Port))
                         {
                             // save client
-                            ClientSocket clientSocket = new ClientSocket(this, endPoint as IPEndPoint);
+                            ClientSocket clientSocket = new ClientSocket(this, endPoint as IPEndPoint, messagePool);
                             // key is ip+port
                             clientSocketsDic.Add(ipEndPoint.Address + ":" + ipEndPoint.Port, clientSocket);
                         }
@@ -176,7 +182,7 @@ public class Server
                 if (args.SocketError == SocketError.Success)
                 {
                     // add client
-                    ClientSocket clientSocket = new ClientSocket(this, args.AcceptSocket);
+                    ClientSocket clientSocket = new ClientSocket(this, args.AcceptSocket, messagePool);
                     lock (clientSocketsDic)
                     {
                         clientSocketsDic.Add(clientSocket.guid, clientSocket);
@@ -211,25 +217,14 @@ public class Server
 
     #region handle
 
-    private void HandlerUdpData(object state)
+    private void HandlerUdpData(object data)
     {
-        int id = BitConverter.ToInt32((byte[])state, 0);
-
-        switch (id)
-        {
-            case 1:
-                MessageTest test = new MessageTest().Deserialize<MessageTest>((byte[])state, 8);
-                Debug.Log($"client: message1 {test.data}");
-                break;
-            case 2:
-                MessageTest2 test2 = new MessageTest2().Deserialize<MessageTest2>((byte[])state, 8);
-                Debug.Log($"client: message2 {test2.data2} {test2.t5.enumTest}");
-                break;
-            case 123:
-                TextMessage textMessage = new TextMessage().Deserialize<TextMessage>((byte[])state, 8);
-                Debug.Log($"client: {textMessage.text}");
-                break;
-        }
+        int id = BitConverter.ToInt32((byte[])data, 0);
+        // use message pool to handle
+        BaseMessage message = messagePool.GetMessage(id).Deserialize<BaseMessage>((byte[])data, 8);
+        BaseHandler handler = messagePool.GetHandler(id);
+        handler.message = message;
+        handler.Handle();
     }
 
     #endregion

@@ -1,7 +1,6 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Script.NetworkManager;
+using Network;
+using Network.Manager;
+using Network.ProtocolClass;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

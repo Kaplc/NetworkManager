@@ -1,9 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
-using Script.NetworkManager;
+using Network;
+using Network.Manager;
+using Network.ProtocolClass;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,6 +23,8 @@ public class ClientPanel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        networkManager = NetworkManager.Instance;
+        
         dropdown.onValueChanged.AddListener((index) =>
         {
             switch (index)
@@ -48,20 +49,17 @@ public class ClientPanel : MonoBehaviour
             switch (type)
             {
                 case ENetworkType.TcpV4:
-                    networkManager = new NetworkManager();
                     networkManager.InitTcpManager(ENetworkType.TcpV4, EAsyncType.Thread, new IPEndPoint(IPAddress.Parse(ipInputField.text), 8800));
-                    networkManager.tcpManager.Connect();
+                    networkManager.TcpManager.Connect();
                     break;
                 case ENetworkType.TcpV6:
-                    networkManager = new NetworkManager();
                     networkManager.InitTcpManager(ENetworkType.TcpV6, EAsyncType.Thread, new IPEndPoint(IPAddress.Parse(ipInputField.text), 8800));
-                    networkManager.tcpManager.Connect();
+                    networkManager.TcpManager.Connect();
                     break;
                 case ENetworkType.UdpV4:
                 case ENetworkType.UdpV6:
-                    networkManager = new NetworkManager();
                     networkManager.InitUdpManager(type, EAsyncType.Thread);
-                    networkManager.udpManager.Start();
+                    networkManager.UDPManager.Start();
                     break;
             }
 
@@ -128,7 +126,7 @@ public class ClientPanel : MonoBehaviour
             byte[] b5 = new byte[bytes3.Length - 5];
             Array.Copy(bytes3, 5, b5, 0, b5.Length);
             
-            networkManager.udpManager.SendTo(t1, new IPEndPoint(IPAddress.Parse(ipInputField.text), 8800));
+            networkManager.UDPManager.SendTo(t1, new IPEndPoint(IPAddress.Parse(ipInputField.text), 8800));
             // networkManager.socket.Send(bytes1);
             // networkManager.socket.Send(bytes2);
             //

@@ -43,34 +43,45 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\HttpPanel.cs" />
     <Compile Include="Assets\Scripts\ServerPanel.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\MessageClass\MessageTest.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\MessageClass\TextMessage.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\DataClass\DataTest2.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\MessageClass\HeartMessage.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\MessageClass\QuitMessage.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\MessageClass\MessageTest.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\MessageClass\TextMessage.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\DataClass\DataTest2.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\MessageClass\HeartMessage.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\Handler\HeartMessageHandler.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\MessageClass\QuitMessage.cs" />
     <Compile Include="Assets\Scripts\UnityWebPanel.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\DataClass\DataTest5.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\DataClass\DataTest4.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\UdpManager.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\TCPManager.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\DataClass\DataTest5.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\DataClass\DataTest4.cs" />
+    <Compile Include="Assets\Scripts\Network\Manager\UdpManager.cs" />
+    <Compile Include="Assets\Scripts\Network\Manager\TCPManager.cs" />
     <Compile Include="Assets\Scripts\FtpPanel.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\UnityWWWManager.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\NetworkManager.cs" />
+    <Compile Include="Assets\Scripts\Network\Manager\UnityWWWManager.cs" />
+    <Compile Include="Assets\Scripts\Network\Manager\NetworkManager.cs" />
+    <Compile Include="Assets\Scripts\Network\Base\BaseMessage.cs" />
     <Compile Include="Assets\Scripts\ClientPanel.cs" />
     <Compile Include="Assets\Scripts\Message1.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\Enum\EnumTest.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\DataClass\DataTest.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\HttpManager.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\Base\BaseNetworkData.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\MessageClass\MessageTest2.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\Enum\EnumTest.cs" />
+    <Compile Include="Assets\Scripts\ProtobufTool.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\DataClass\DataTest.cs" />
+    <Compile Include="Assets\Scripts\Network\Manager\HttpManager.cs" />
+    <Compile Include="Assets\Scripts\Protobuf\HeartMessage.cs" />
+    <Compile Include="Assets\Scripts\Network\Base\BaseNetworkData.cs" />
+    <Compile Include="Assets\Scripts\Library\BaseSingleton\BaseMonoSingleton.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\MessageClass\MessageTest2.cs" />
     <Compile Include="Assets\Scripts\Server\ClientSocket.cs" />
     <Compile Include="Assets\Scripts\Server\Server.cs" />
     <Compile Include="Assets\Scripts\CustomDownloadHandler.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\UnityWebManager.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\ProtocolClass\DataClass\DataTest3.cs" />
-    <Compile Include="Assets\Scripts\NetworkManager\FtpManager.cs" />
-    <Compile Include="Assets\Scripts\ProtobufTool.cs" />
-    <Compile Include="Assets\Scripts\Protobuf\HeartMessage.cs" />
+    <Compile Include="Assets\Scripts\Library\BaseSingleton\BaseMonoAutoSingleton.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\MessagePool.cs" />
+    <Compile Include="Assets\Scripts\Library\BaseSingleton\BaseSingleton.cs" />
+    <Compile Include="Assets\Scripts\Network\Manager\UnityWebManager.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\DataClass\DataTest3.cs" />
+    <Compile Include="Assets\Scripts\Network\Base\BaseHandler.cs" />
+    <Compile Include="Assets\Scripts\Network\Manager\FtpManager.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\Handler\QuitMessageHandler.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\Handler\MessageTest2Handler.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\Handler\MessageTestHandler.cs" />
+    <Compile Include="Assets\Scripts\Network\ProtocolClass\Handler\TextMessageHandler.cs" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
@@ -331,17 +342,17 @@
     <Reference Include="UnityEditor.UnityConnectModule">
       <HintPath>E:\Develop\Unity\2021.3.36f1\Editor\Data\Managed\UnityEngine\UnityEditor.UnityConnectModule.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
-      <HintPath>G:\project\UnityProject\NetworkManager\Library\PackageCache\com.unity.visualscripting@1.9.2\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="ReportGeneratorMerged">
-      <HintPath>G:\project\UnityProject\NetworkManager\Library\PackageCache\com.unity.testtools.codecoverage@1.2.5\lib\ReportGenerator\ReportGeneratorMerged.dll</HintPath>
-    </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
       <HintPath>G:\project\UnityProject\NetworkManager\Assets\Plugins\Protobuf\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="Google.Protobuf">
       <HintPath>G:\project\UnityProject\NetworkManager\Assets\Plugins\Protobuf\Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
+      <HintPath>G:\project\UnityProject\NetworkManager\Library\PackageCache\com.unity.visualscripting@1.9.2\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="ReportGeneratorMerged">
+      <HintPath>G:\project\UnityProject\NetworkManager\Library\PackageCache\com.unity.testtools.codecoverage@1.2.5\lib\ReportGenerator\ReportGeneratorMerged.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>E:\Develop\Unity\2021.3.36f1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>

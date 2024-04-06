@@ -4,6 +4,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Timers;
+using Network.Base;
+using Network.ProtocolClass;
 using UnityEngine;
 using Timer = System.Timers.Timer;
 
@@ -17,6 +19,7 @@ namespace Script.NetworkManager
         private Server server;
         public IPEndPoint ipEndPoint;
         public ENetworkType type;
+        private MessagePool messagePool;
 
         #region handle package
 
@@ -39,13 +42,14 @@ namespace Script.NetworkManager
 
         #endregion
         
-        public ClientSocket(Server server, Socket socket)
+        public ClientSocket(Server server, Socket socket, MessagePool messagePool)
         {
             type = ENetworkType.TcpV4;
             
             guid = Guid.NewGuid().ToString();
             this.socket = socket;
             this.server = server;
+            this.messagePool = messagePool;
 
             // 创建一个定时器对象，设置时间间隔为1秒
             timer = new Timer(1000);
@@ -67,11 +71,12 @@ namespace Script.NetworkManager
         }
         
         // new udp client
-        public ClientSocket(Server server, IPEndPoint ipEndPoint)
+        public ClientSocket(Server server, IPEndPoint ipEndPoint, MessagePool messagePool)
         {
             type = ENetworkType.UdpV4;
             this.server = server;
             this.ipEndPoint = ipEndPoint;
+            this.messagePool = messagePool;
         }
 
         public void Close()
@@ -101,15 +106,15 @@ namespace Script.NetworkManager
                     byte[] bytes = new byte[socket.Available];
                     socket.Receive(bytes);
 
-                    // HandlePackage(bytes, bytes.Length);
-                    HandlerProtobufThread(bytes);
+                    HandlePackage(bytes, bytes.Length);
+                    // HandlerProtobufThread(bytes);
                 }
             }
         }
 
         #endregion
 
-        #region async
+        #region api async
 
         public void ReceiveAsync()
         {
@@ -173,8 +178,8 @@ namespace Script.NetworkManager
 
                 byte[] messageBuffer = new byte[messageLength];
                 Array.Copy(handlePackageCacheBuffer, readIndex, messageBuffer, 0, messageLength);
-                // ThreadPool.QueueUserWorkItem(HandlerThread, messageBuffer);
-                ThreadPool.QueueUserWorkItem(HandlerProtobufThread, messageBuffer);
+                ThreadPool.QueueUserWorkItem(HandlerThread, messageBuffer);
+                // ThreadPool.QueueUserWorkItem(HandlerProtobufThread, messageBuffer);
 
                 if (cacheIndex >  messageLength + readIndex)
                 {
@@ -193,29 +198,11 @@ namespace Script.NetworkManager
         private void HandlerThread(object data)
         {
             int id = BitConverter.ToInt32((byte[])data, 0);
-
-            switch (id)
-            {
-                case 1:
-                    MessageTest test = new MessageTest().Deserialize<MessageTest>((byte[])data, 8);
-                    Debug.Log($"client: message1 {test.data}");
-                    break;
-                case 2:
-                    MessageTest2 test2 = new MessageTest2().Deserialize<MessageTest2>((byte[])data, 8);
-                    Debug.Log($"client: message2 {test2.data2} {test2.t5.enumTest}");
-                    break;
-                case 500:
-                    server.willRemoveClientSockets.Enqueue(this);
-                    break;
-                case 123:
-                    TextMessage textMessage = new TextMessage().Deserialize<TextMessage>((byte[])data, 8);
-                    Debug.Log($"client: {textMessage.text}");
-                    break;
-                case 99:
-                    Debug.Log("heart");
-                    heartTime = 0;
-                    break;
-            }
+            // use message pool to handle
+            BaseMessage message = messagePool.GetMessage(id).Deserialize<BaseMessage>((byte[])data, 8);
+            BaseHandler handler = messagePool.GetHandler(id);
+            handler.message = message;
+            handler.Handle();
         }
 
         private void HandlerProtobufThread(object data)

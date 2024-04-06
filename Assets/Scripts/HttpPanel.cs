@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using Network;
+using Network.Manager;
 using Script.NetworkManager;
 using UnityEngine;
 using UnityEngine.UI;

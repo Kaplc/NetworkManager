@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Network;
+using Network.Manager;
 using Script.NetworkManager;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -23,7 +25,7 @@ public class FtpPanel : MonoBehaviour
         
         button.onClick.AddListener(() =>
         {
-            networkManager.ftpManager.UploadFile(Application.dataPath + "/2.jpg", "12.jpg", () =>
+            networkManager.FtpManager.UploadFile(Application.dataPath + "/2.jpg", "12.jpg", () =>
             {
                 Debug.Log("upload success");
             });
@@ -31,7 +33,7 @@ public class FtpPanel : MonoBehaviour
         
         btnDownload.onClick.AddListener(() =>
         {
-            networkManager.ftpManager.DownloadFile("12.jpg", Application.dataPath + "/3.jpg", () =>
+            networkManager.FtpManager.DownloadFile("12.jpg", Application.dataPath + "/3.jpg", () =>
             {
                 Debug.Log("download success");
             });
@@ -40,7 +42,7 @@ public class FtpPanel : MonoBehaviour
         
         btnGetFileSize.onClick.AddListener(() =>
         {
-            networkManager.ftpManager.GetFileSize("12.jpg", size =>
+            networkManager.FtpManager.GetFileSize("12.jpg", size =>
             {
                 Debug.Log("size: " + size);
             });
@@ -48,7 +50,7 @@ public class FtpPanel : MonoBehaviour
         
         btnCreateDirectory.onClick.AddListener(() =>
         {
-            networkManager.ftpManager.CreateDirectory("Save2", () =>
+            networkManager.FtpManager.CreateDirectory("Save2", () =>
             {
                 Debug.Log("create directory success");
             });
@@ -56,7 +58,7 @@ public class FtpPanel : MonoBehaviour
         
         btnGetFileList.onClick.AddListener(() =>
         {
-            networkManager.ftpManager.GetFileList("Save2", list =>
+            networkManager.FtpManager.GetFileList("Save2", list =>
             {
                 foreach (var item in list)
                 {

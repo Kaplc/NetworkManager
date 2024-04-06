@@ -1,5 +1,6 @@
 using System.IO;
 using System.Xml;
+using Editor.ProtocolTool.Csharp;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,7 +15,7 @@ namespace Editor.ProtocolTool
     public static class ProtocolTool
     {
         private static string XML_PATH = Application.dataPath + "/Config/Network/Protocol.xml";
-        private static string CSHARP_CLASS_PATH = Application.dataPath + "/Script/NetworkManager/ProtocolClass/";
+        private static string CSHARP_CLASS_PATH = Application.dataPath + "/Scripts/Network/ProtocolClass/";
 
         private static CsharpGenerator csharpGenerator;
         
